@@ -210,15 +210,33 @@ main{max-width:980px;margin:0 auto;padding:16px}
 .tl-item.meal .tl-body{background:var(--tint)} .tl-item.meal .tl-body::before{border-color:var(--gold)}
 .tl-item.move .tl-body::before{border-color:#94A3B8}
 .tl-item.tour .tl-body::before{border-color:var(--green)}
-.tl-item.past{opacity:.55}
-.tl-item.live .tl-body{border:2px solid var(--orange);box-shadow:0 6px 18px rgba(243,115,33,.18)}
+.tl-item.past{opacity:.5}
+.tl-item.past .tl-title{font-weight:700}
+.tl-item.live .tl-body{border:2.5px solid var(--orange);background:#FFF6EE;box-shadow:0 10px 26px rgba(243,115,33,.28);transform:scale(1.015)}
+.tl-item.live .tl-title{font-size:17px;font-weight:900;color:#B4400A}
+.tl-item.live .tl-who{color:var(--ink);font-weight:800}
+.tl-item.live .tl-time{color:var(--orange);font-size:15px;font-weight:900}
+.tl-item.next .tl-body{border:2px dashed var(--blue);background:var(--tint)}
+.tl-item.next .tl-title{font-weight:900;color:var(--blue)}
+.tl-item.next .tl-body::before{border-color:var(--blue);background:var(--blue)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tl-item.live .tl-body{background:rgba(243,115,33,.14)}:root:not([data-theme="light"]) .tl-item.live .tl-title{color:#FDBA74}:root:not([data-theme="light"]) .tl-item.next .tl-title{color:#7DB8F2}}
+.tl-badges{margin-bottom:6px}
+.badge-next{display:inline-block;background:var(--blue);color:#fff;font-size:11.5px;font-weight:900;padding:3px 9px;border-radius:999px}
+.badge-done{display:inline-block;background:#94A3B8;color:#fff;font-size:11px;font-weight:800;padding:2px 8px;border-radius:999px}
+.tl-status{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 14px;margin-bottom:16px;border-radius:14px;background:linear-gradient(115deg,#072650,var(--blue));color:#fff}
+.tl-status .clock{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;background:rgba(255,255,255,.16);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.tl-status .clock svg{width:14px;height:14px}
+.tl-status .msg{font-size:14px;font-weight:700;flex:1;min-width:200px}
+.tl-status .hl{color:#FFC9A3;font-weight:900}
+.tl-status .jump{background:var(--orange);color:#fff;font-weight:800;font-size:12.5px;padding:6px 12px;border-radius:999px}
 .tl-item.live .tl-body::before{border-color:var(--orange);background:var(--orange);animation:ping 1.4s ease-out infinite}
 @keyframes ping{0%{box-shadow:0 0 0 0 rgba(243,115,33,.6)}100%{box-shadow:0 0 0 10px rgba(243,115,33,0)}}
 .tl-title{font-size:15px;font-weight:800;line-height:1.4}
 .tl-who{font-size:13px;color:var(--ink-2);font-weight:600;margin-top:2px}
 .tl-where{font-size:12.5px;color:var(--ink-3);margin-top:4px;display:flex;gap:4px;align-items:flex-start}
 .tl-where svg{width:13px;height:13px;flex-shrink:0;margin-top:3px}
-.badge-live{display:inline-block;background:var(--orange);color:#fff;font-size:11px;font-weight:900;padding:2px 7px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.badge-live{display:inline-block;background:var(--orange);color:#fff;font-size:12px;font-weight:900;padding:3px 10px;border-radius:999px;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.65}}
 .route-inline{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:6px}
 .route-inline span{font-size:12px;font-weight:700;background:var(--tint);padding:3px 7px;border-radius:6px}
 .route-inline i{font-style:normal;color:var(--ink-3);font-size:11px}
@@ -490,6 +508,7 @@ footer .lg-hug{height:clamp(17px,4vw,27px);max-width:50%}
           <button data-day="1" class="on">1일차 이론교육<small>10.28(수) · 교육장</small></button>
           <button data-day="2">2일차 현장답사<small>10.29(목) · 동래·수영</small></button>
         </div>
+        <div class="tl-status" id="tlStatus"></div>
         <div class="tl" id="timeline"></div>
       </div>
     </div></section>
@@ -764,6 +783,7 @@ function selectTab(t, push = true){
   $$('.panel').forEach(p => p.classList.toggle('on', p.id === 'p-' + t));
   if (push && location.hash !== '#info/' + t) history.replaceState(null, '', '#info/' + t);
   window.scrollTo({ top: 0 });
+  if (t === 'schedule' && typeof scrollToFocus === 'function') { renderTimeline(); scrollToFocus(); }
 }
 $$('.tab').forEach(b => b.onclick = () => selectTab(b.dataset.tab));
 
@@ -775,6 +795,7 @@ const ICON = {
   person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',
   hospital: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
   fire: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4 0 7-2.8 7-6.8 0-3.6-2.6-6-4-8.7-.6 2-1.6 3.2-3 3.7C12 7 11 4.4 8.6 2 8.8 6 5 8.8 5 15.2 5 19.2 8 22 12 22z"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
   phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg>',
 };
 const mapLinks = q => `<a class="n" href="https://map.naver.com/p/search/${encodeURIComponent(q)}" target="_blank" rel="noopener">네이버지도</a><a class="k" href="https://map.kakao.com/link/search/${encodeURIComponent(q)}" target="_blank" rel="noopener">카카오맵</a>`;
@@ -800,19 +821,51 @@ $('#checklist').addEventListener('change', () => store('chk', JSON.stringify($$(
 
 /* ---------- Timeline & live status ---------- */
 let curDay = 1;
+const WEEK = ['일','월','화','수','목','금','토'];
+const pad2 = n => String(n).padStart(2, '0');
+function kstParts(d){ const k = new Date(d.getTime() + 9 * 3600e3); return { M: k.getUTCMonth() + 1, D: k.getUTCDate(), w: WEEK[k.getUTCDay()], h: k.getUTCHours(), m: k.getUTCMinutes() }; }
+/* 접속 시각 기준: 진행 중(live) / 다음 일정(next) 찾기 */
+function findFocus(now){
+  let live = null, next = null;
+  for (const day of [1, 2]) DATA.schedule[day].forEach((it, i) => {
+    const st = kst(DATA.dates[day], it.s), en = kst(DATA.dates[day], it.e);
+    if (!live && now >= st && now < en) live = { day, i };
+    if (!next && st > now) next = { day, i };
+  });
+  return { live, next };
+}
 function renderTimeline(){
-  const now = nowKST(), d = DATA.dates[curDay];
-  $('#timeline').innerHTML = DATA.schedule[curDay].map(it => {
+  const now = nowKST(), d = DATA.dates[curDay], { live, next } = findFocus(now);
+  const focus = live || next;
+  $('#timeline').innerHTML = DATA.schedule[curDay].map((it, i) => {
     const st = kst(d, it.s), en = kst(d, it.e);
-    const state = now >= en ? 'past' : (now >= st ? 'live' : '');
-    const route = it.route ? `<div class="route-inline">${it.route.map((r, i) => `<span>${r}</span>${i < it.route.length - 1 ? '<i>→</i>' : ''}`).join('')}</div>` : '';
-    return `<div class="tl-item ${it.type} ${state}">
-      <div class="tl-time">${it.s}<small>~${it.type === 'move' && it.title === '해산' ? '' : it.e}</small></div>
-      <div class="tl-body"><div class="tl-title">${it.title}${state === 'live' ? '<span class="badge-live">진행 중</span>' : ''}</div>
+    let state = now >= en ? 'past' : '';
+    if (live && live.day === curDay && live.i === i) state = 'live';
+    else if (!live && next && next.day === curDay && next.i === i) state = 'next';
+    const badge = state === 'live' ? '<span class="badge-live">● 지금 진행 중</span>' : state === 'next' ? '<span class="badge-next">다음 일정</span>' : state === 'past' ? '<span class="badge-done">종료</span>' : '';
+    const route = it.route ? `<div class="route-inline">${it.route.map((r, j) => `<span>${r}</span>${j < it.route.length - 1 ? '<i>→</i>' : ''}`).join('')}</div>` : '';
+    return `<div class="tl-item ${it.type} ${state}" ${state === 'live' || state === 'next' ? 'id="tlFocus"' : ''}>
+      <div class="tl-time">${it.s}<small>~${it.title === '해산' ? '' : it.e}</small></div>
+      <div class="tl-body">${badge ? `<div class="tl-badges">${badge}</div>` : ''}<div class="tl-title">${it.title}</div>
       ${it.who ? `<div class="tl-who">${it.who}</div>` : ''}${route}
       ${it.where ? `<div class="tl-where">${ICON.pin}${it.where}</div>` : ''}</div></div>`;
   }).join('');
+  // 상단 현재 시각 안내
+  const p = kstParts(now);
+  let msg;
+  const first = kst(DATA.dates[1], DATA.schedule[1][0].s);
+  if (live) { const it = DATA.schedule[live.day][live.i]; msg = `<b>DAY ${live.day} · ${it.s}~${it.e}</b> <span class="hl">${it.title}</span> 진행 중입니다`; }
+  else if (now < first) { const dd = Math.ceil((kst(DATA.dates[1], '00:00') - now) / 864e5); msg = `교육 시작까지 <b class="hl">D-${dd}</b> · 첫 일정 <b>10.28(수) 09:30 교육장 집합</b>`; }
+  else if (next) { const it = DATA.schedule[next.day][next.i]; msg = `다음 일정 <b>DAY ${next.day} · ${it.s}</b> <span class="hl">${it.title}</span>`; }
+  else msg = '모든 교육 일정이 종료되었습니다. 감사합니다!';
+  $('#tlStatus').innerHTML = `<span class="clock">${ICON.clock}${p.M}.${pad2(p.D)}(${p.w}) ${pad2(p.h)}:${pad2(p.m)} 기준</span><span class="msg">${msg}</span>${focus && focus.day !== curDay ? `<button class="jump" data-day="${focus.day}">DAY ${focus.day}로 이동 →</button>` : ''}`;
+  const j = $('#tlStatus .jump'); if (j) j.onclick = () => { $$('#seg button')[focus.day - 1].click(); scrollToFocus(); };
 }
+function scrollToFocus(){
+  setTimeout(() => { const f = document.getElementById('tlFocus'); if (f && $('#p-schedule').classList.contains('on')) f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 120);
+}
+// 접속 시 해당 일차 자동 선택
+(function autoDay(){ const { live, next } = findFocus(nowKST()); const f = live || next; if (f) curDay = f.day; $$('#seg button').forEach(x => x.classList.toggle('on', +x.dataset.day === curDay)); })();
 $$('#seg button').forEach(b => b.onclick = () => { curDay = +b.dataset.day; $$('#seg button').forEach(x => x.classList.toggle('on', x === b)); renderTimeline(); });
 
 function renderNow(){
@@ -848,11 +901,10 @@ function renderNow(){
   el.innerHTML = html;
   const g = el.querySelector('[data-goto]'); if (g) g.onclick = () => selectTab(g.dataset.goto);
   // 일정표 기본 탭: 2일차 당일이면 DAY2
-  if (now >= kst(DATA.dates[2], '00:00') && curDay === 1 && !renderNow.done) { $$('#seg button')[1].click(); }
   renderNow.done = true;
 }
 renderTimeline(); renderNow();
-setInterval(() => { renderTimeline(); renderNow(); }, 60000);
+setInterval(() => { renderTimeline(); renderNow(); }, 30000);
 
 /* ---------- Utilities ---------- */
 function toast(m){ const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 2200); }
