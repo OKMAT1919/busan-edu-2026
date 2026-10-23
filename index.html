@@ -184,6 +184,13 @@ main{max-width:980px;margin:0 auto;padding:16px}
 .site{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--card)}
 .site h4{font-size:15.5px;font-weight:900;margin:4px 0}
 .site p{font-size:13.5px;color:var(--ink-2)}
+.site{display:flex;flex-direction:column;align-items:flex-start}
+.site p{flex:1}
+.sitelink{margin-top:10px;display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--blue);
+  background:var(--tint);border:1px solid rgba(0,84,166,.18);padding:7px 12px;border-radius:10px}
+.sitelink svg{width:14px;height:14px}
+.sitelink:hover{background:var(--blue);color:#fff}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sitelink{color:#7DB8F2}}
 
 /* Schedule */
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--tint);padding:5px;border-radius:14px;margin-bottom:14px}
@@ -566,10 +573,12 @@ const DATA = {
     '사업지 발굴, 성과관리 및 모니터링 등 사업추진 실무역량 강화',
     '종료사업지 사후관리 미흡·젠트리피케이션 등 부작용 사례를 통한 재발 방지',
   ],
+  // 현장답사지 소개 (area 색상: 동래구=파랑, 수영구=초록, 부산시=주황)
   sites: [
-    { area: '동래구', name: '혁신어울림센터', desc: '쇠퇴한 온천장 지역에 활력을 불어넣고 세대 간 소통을 돕는 지역 커뮤니티 거점 — 사후관리 우수 사례' },
-    { area: '수영구', name: '도도수영', desc: '역사문화자원을 활용한 지역 활성화와 주민참여 기반 구축으로 공동체 회복을 이끈 사례' },
-    { area: '수영구', name: 'F1963', desc: '민관 협업 리노베이션으로 사회문화적 가치와 기능을 지닌 공간으로 재창조한 사례' },
+    { area: '동래구', name: '혁신어울림센터', desc: '쇠퇴한 온천장 지역에 활력을 불어넣고 세대 간 소통을 돕는 지역 커뮤니티 거점 — 사후관리 우수 사례', url: 'http://www.diec.or.kr/hello.php' },
+    { area: '수영구', name: '도도수영 8A', desc: '역사문화자원을 활용한 지역 활성화와 주민참여 기반 구축으로 공동체 회복을 이끈 사례', url: 'https://www.dodosuyeong.com/index.dodo' },
+    { area: '수영구', name: 'F1963', desc: '민관 협업 리노베이션으로 사회문화적 가치와 기능을 지닌 공간으로 재창조한 사례', url: 'https://www.f1963.org/ko/' },
+    { area: '부산시', name: '부산도시공사 도시재생', desc: '노후·쇠퇴 지역의 물리적·경제적·사회문화적 부분을 종합적으로 개선해 도시의 활력을 찾는 사업 — 샛디산복마을, 호천마을, 영도 경제기반형 등', url: 'https://www.bmc.busan.kr/index.do?menuCd=DOM_000000102003000000&pageIndex=1' },
   ],
   // type: lecture | meal | move | tour | gather
   schedule: {
@@ -697,7 +706,8 @@ const mapLinks = q => `<a class="n" href="https://map.naver.com/p/search/${encod
 
 $('#kv').innerHTML = DATA.overview.map(o => `<div class="kv-row"><span class="kv-k">${o.k}</span><div class="kv-v">${o.html || (o.v + (o.sub ? `<span class="sub">${o.sub}</span>` : ''))}</div></div>`).join('');
 $('#goals').innerHTML = DATA.goals.map(g => `<li>${g}</li>`).join('');
-$('#sites').innerHTML = DATA.sites.map(s => `<div class="site"><span class="pill ${s.area === '동래구' ? 'p-blue' : 'p-green'}">${s.area}</span><h4>${s.name}</h4><p>${s.desc}</p><div class="maplinks">${mapLinks(s.area + ' ' + s.name)}</div></div>`).join('');
+const AREA_COLOR = { '동래구': 'p-blue', '수영구': 'p-green', '부산시': 'p-orange' };
+$('#sites').innerHTML = DATA.sites.map(s => `<div class="site"><span class="pill ${AREA_COLOR[s.area] || 'p-gray'}">${s.area}</span><h4>${s.name}</h4><p>${s.desc}</p><a class="sitelink" href="${s.url}" target="_blank" rel="noopener">홈페이지 바로가기<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a></div>`).join('');
 $('#routeSteps').innerHTML = DATA.routeStops.map(s => `<div class="step"><div class="s-b"><h4>${s.name}</h4><p>${s.desc}</p><div class="maplinks">${mapLinks(s.q)}</div></div></div>`).join('');
 $('#walk').innerHTML = DATA.walk.map((w, i) => `<span>${i + 1}. ${w}</span>${i < DATA.walk.length - 1 ? '<i>›</i>' : ''}`).join('');
 $('#hotels').innerHTML = DATA.hotels.map(h => `<div class="hotel"><div><h4>${h.name}</h4><p>${h.area}</p><div class="maplinks">${mapLinks(h.q)}</div></div><span class="price">${h.price}</span></div>`).join('');
