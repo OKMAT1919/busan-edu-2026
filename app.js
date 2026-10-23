@@ -1,3 +1,6 @@
+/* 이미지 복제 억제: 우클릭 저장·끌어서 저장 차단 (지도·로고 등) */
+document.addEventListener('contextmenu', e => { if (e.target.closest('img, .figure')) e.preventDefault(); });
+document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
 /* 클릭재킹 방지: 다른 사이트의 iframe 안에서 열리지 않도록 */
 if (window.top !== window.self) { try { window.top.location = window.self.location; } catch (e) { document.documentElement.style.display = 'none'; } }
 /* =========================================================
