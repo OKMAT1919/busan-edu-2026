@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="ko"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNjM0OTM4OTU3MzQ1MDc3OTEwNyIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2E3NjZjMWNmYzVmMDZkZDBfaW5kZXguaHRtbC05NzYifSwiZXhwIjoxNzkyNzIxMTE1LCJpYXQiOjE3OTI3MTc1MTUsImFsZyI6IlJTMjU2In0.RzMDYzfq6V0xNkJrp87o9qhp7YFvSczc4C9rJilFI351Snjo6mjXq1lh46fG4MJTN4rKbMmCKL91f2lO7FzyCdCXWpKdHrUI550NKzASh-1liabgJyc084B_8Jx0ygvZcRsnKKNnmEVkdv9a0vrz1ekIBoy9bah8_mwf8v_vf0Qlk2LIbgBKKW2ekWgL5R1uHgtxknaU-bUnZ3UoxlndTDg9A13OqjL_c2E1jaN36PGg_wM4A00I-1Ogpk9aYoASLwmu8fW6vkcSXdEfGj7vdzCBovWmMUxv7sr0yf492x77uEBbeKeQRrijotxdqEPGVCZGJ8X0zk42kqRz9oakxg","c_a766c1cfc5f06dd0_index.html-976")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 도시재생 지자체 공무원 교육 및 현장답사 플랫폼</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Pretendard', sans-serif; letter-spacing: -0.015em; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.25s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        #map { height: 100%; min-height: 460px; border-radius: 1rem; z-index: 10; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.-bottom-8{bottom:-2rem}.-right-8{right:-2rem}.top-0{top:0px}.z-10{z-index:10}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.ml-1{margin-left:0.25rem}.ml-2{margin-left:0.5rem}.mr-1{margin-right:0.25rem}.mr-1\.5{margin-right:0.375rem}.mr-2{margin-right:0.5rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-12{margin-top:3rem}.mt-2{margin-top:0.5rem}.mt-1\.5{margin-top:0.375rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-11{height:2.75rem}.h-2\.5{height:0.625rem}.h-7{height:1.75rem}.h-\[460px\]{height:460px}.h-5{height:1.25rem}.h-6{height:1.5rem}.h-8{height:2rem}.max-h-\[300px\]{max-height:300px}.max-h-\[340px\]{max-height:340px}.max-h-\[420px\]{max-height:420px}.max-h-\[540px\]{max-height:540px}.min-h-screen{min-height:100vh}.w-11{width:2.75rem}.w-2\.5{width:0.625rem}.w-7{width:1.75rem}.w-full{width:100%}.w-1\/2{width:50%}.w-24{width:6rem}.w-28{width:7rem}.w-36{width:9rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-8{width:2rem}.min-w-0{min-width:0px}.min-w-\[160px\]{min-width:160px}.max-w-2xl{max-width:42rem}.max-w-3xl{max-width:48rem}.max-w-7xl{max-width:80rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-x-2 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.5rem * var(--tw-space-x-reverse));margin-left:calc(0.5rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.625rem * var(--tw-space-x-reverse));margin-left:calc(0.625rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-3 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.75rem * var(--tw-space-x-reverse));margin-left:calc(0.75rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-3\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.875rem * var(--tw-space-x-reverse));margin-left:calc(0.875rem * calc(1 - var(--tw-space-x-reverse)))}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.space-x-1 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.25rem * var(--tw-space-x-reverse));margin-left:calc(0.25rem * calc(1 - var(--tw-space-x-reverse)))}.space-x-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(0.375rem * var(--tw-space-x-reverse));margin-left:calc(0.375rem * calc(1 - var(--tw-space-x-reverse)))}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-r-xl{border-top-right-radius:0.75rem;border-bottom-right-radius:0.75rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-l-4{border-left-width:4px}.border-blue-200{--tw-border-opacity:1;border-color:rgb(191 219 254 / var(--tw-border-opacity, 1))}.border-emerald-100{--tw-border-opacity:1;border-color:rgb(209 250 229 / var(--tw-border-opacity, 1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208 / var(--tw-border-opacity, 1))}.border-indigo-100{--tw-border-opacity:1;border-color:rgb(224 231 255 / var(--tw-border-opacity, 1))}.border-indigo-800{--tw-border-opacity:1;border-color:rgb(55 48 163 / var(--tw-border-opacity, 1))}.border-red-100{--tw-border-opacity:1;border-color:rgb(254 226 226 / var(--tw-border-opacity, 1))}.border-red-200{--tw-border-opacity:1;border-color:rgb(254 202 202 / var(--tw-border-opacity, 1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-200\/80{border-color:rgb(226 232 240 / 0.8)}.border-slate-700{--tw-border-opacity:1;border-color:rgb(51 65 85 / var(--tw-border-opacity, 1))}.border-slate-800{--tw-border-opacity:1;border-color:rgb(30 41 59 / var(--tw-border-opacity, 1))}.border-emerald-500{--tw-border-opacity:1;border-color:rgb(16 185 129 / var(--tw-border-opacity, 1))}.border-indigo-500{--tw-border-opacity:1;border-color:rgb(99 102 241 / var(--tw-border-opacity, 1))}.border-slate-200\/60{border-color:rgb(226 232 240 / 0.6)}.border-slate-300{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-50\/70{background-color:rgb(236 253 245 / 0.7)}.bg-emerald-50\/80{background-color:rgb(236 253 245 / 0.8)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-indigo-100{--tw-bg-opacity:1;background-color:rgb(224 231 255 / var(--tw-bg-opacity, 1))}.bg-indigo-50{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.bg-indigo-50\/70{background-color:rgb(238 242 255 / 0.7)}.bg-indigo-50\/80{background-color:rgb(238 242 255 / 0.8)}.bg-indigo-500{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-indigo-700{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}.bg-indigo-900{--tw-bg-opacity:1;background-color:rgb(49 46 129 / var(--tw-bg-opacity, 1))}.bg-indigo-950{--tw-bg-opacity:1;background-color:rgb(30 27 75 / var(--tw-bg-opacity, 1))}.bg-pink-100{--tw-bg-opacity:1;background-color:rgb(252 231 243 / var(--tw-bg-opacity, 1))}.bg-red-100{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-red-600{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-200{--tw-bg-opacity:1;background-color:rgb(226 232 240 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-800{--tw-bg-opacity:1;background-color:rgb(30 41 59 / var(--tw-bg-opacity, 1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-white\/15{background-color:rgb(255 255 255 / 0.15)}.bg-yellow-400{--tw-bg-opacity:1;background-color:rgb(250 204 21 / var(--tw-bg-opacity, 1))}.bg-slate-50\/50{background-color:rgb(248 250 252 / 0.5)}.bg-slate-50\/60{background-color:rgb(248 250 252 / 0.6)}.bg-slate-50\/70{background-color:rgb(248 250 252 / 0.7)}.bg-gradient-to-br{background-image:linear-gradient(to bottom right, var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-indigo-900{--tw-gradient-from:#312e81 var(--tw-gradient-from-position);--tw-gradient-to:rgb(49 46 129 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-slate-900{--tw-gradient-from:#0f172a var(--tw-gradient-from-position);--tw-gradient-to:rgb(15 23 42 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.via-indigo-800{--tw-gradient-to:rgb(55 48 163 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #3730a3 var(--tw-gradient-via-position), var(--tw-gradient-to)}.via-indigo-950{--tw-gradient-to:rgb(30 27 75 / 0)  var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), #1e1b4b var(--tw-gradient-via-position), var(--tw-gradient-to)}.to-blue-900{--tw-gradient-to:#1e3a8a var(--tw-gradient-to-position)}.to-slate-900{--tw-gradient-to:#0f172a var(--tw-gradient-to-position)}.p-1{padding:0.25rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-1\.5{padding:0.375rem}.p-2{padding:0.5rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-3{padding-bottom:0.75rem}.pb-4{padding-bottom:1rem}.pr-1{padding-right:0.25rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-9xl{font-size:8rem;line-height:1}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-\[10px\]{font-size:10px}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-500{--tw-text-opacity:1;color:rgb(245 158 11 / var(--tw-text-opacity, 1))}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-emerald-400{--tw-text-opacity:1;color:rgb(52 211 153 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-emerald-900{--tw-text-opacity:1;color:rgb(6 78 59 / var(--tw-text-opacity, 1))}.text-emerald-950{--tw-text-opacity:1;color:rgb(2 44 34 / var(--tw-text-opacity, 1))}.text-indigo-100{--tw-text-opacity:1;color:rgb(224 231 255 / var(--tw-text-opacity, 1))}.text-indigo-200{--tw-text-opacity:1;color:rgb(199 210 254 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-indigo-900{--tw-text-opacity:1;color:rgb(49 46 129 / var(--tw-text-opacity, 1))}.text-indigo-950{--tw-text-opacity:1;color:rgb(30 27 75 / var(--tw-text-opacity, 1))}.text-pink-600{--tw-text-opacity:1;color:rgb(219 39 119 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-red-700{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-yellow-300{--tw-text-opacity:1;color:rgb(253 224 71 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-10{opacity:0.1}.shadow{--tw-shadow:0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:border-amber-300:hover{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity, 1))}.hover\:border-indigo-300:hover{--tw-border-opacity:1;border-color:rgb(165 180 252 / var(--tw-border-opacity, 1))}.hover\:bg-amber-100:hover{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-100:hover{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-500:hover{--tw-bg-opacity:1;background-color:rgb(16 185 129 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-100:hover{--tw-bg-opacity:1;background-color:rgb(224 231 255 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-50:hover{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-500:hover{--tw-bg-opacity:1;background-color:rgb(99 102 241 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-800:hover{--tw-bg-opacity:1;background-color:rgb(55 48 163 / var(--tw-bg-opacity, 1))}.hover\:bg-red-50:hover{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:bg-yellow-300:hover{--tw-bg-opacity:1;background-color:rgb(253 224 71 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-50\/50:hover{background-color:rgb(238 242 255 / 0.5)}.hover\:bg-red-100:hover{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:text-slate-900:hover{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.hover\:text-red-700:hover{--tw-text-opacity:1;color:rgb(185 28 28 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.disabled\:opacity-30:disabled{opacity:0.3}.group:hover .group-hover\:translate-x-0\.5{--tw-translate-x:0.125rem;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width: 640px){.sm\:col-span-2{grid-column:span 2 / span 2}.sm\:w-auto{width:auto}.sm\:flex-initial{flex:0 1 auto}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:flex-nowrap{flex-wrap:nowrap}.sm\:items-center{align-items:center}.sm\:gap-4{gap:1rem}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:p-4{padding:1rem}.sm\:text-right{text-align:right}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width: 768px){.md\:w-auto{width:auto}.md\:flex-initial{flex:0 1 auto}.md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}.md\:p-8{padding:2rem}.md\:text-2xl{font-size:1.5rem;line-height:2rem}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}.md\:text-base{font-size:1rem;line-height:1.5rem}}@media (min-width: 1024px){.lg\:col-span-5{grid-column:span 5 / span 5}.lg\:col-span-7{grid-column:span 7 / span 7}.lg\:grid-cols-12{grid-template-columns:repeat(12, minmax(0, 1fr))}.lg\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}}</style></head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Sticky Header -->
+    <header class="bg-indigo-950 text-white shadow-lg sticky top-0 z-50 border-b border-indigo-800">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-yellow-400 text-indigo-950 p-2.5 rounded-xl font-extrabold text-xl shadow-md flex items-center justify-center">
+                    <i class="fa-solid fa-building-wheat"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-indigo-700 text-indigo-200 text-[11px] font-bold px-2 py-0.5 rounded">HUG · 국토연구원</span>
+                        <span class="bg-emerald-600 text-white text-[11px] font-bold px-2 py-0.5 rounded">26.10.22 수정반영</span>
+                    </div>
+                    <h1 class="text-base sm:text-lg font-extrabold tracking-tight mt-0.5">2026년 도시재생 지자체 공무원 교육 플랫폼</h1>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex flex-wrap gap-1.5 w-full sm:w-auto justify-end">
+                <button onclick="switchTab('participant')" id="btn-participant" class="flex-1 sm:flex-initial px-3.5 py-2 text-xs sm:text-sm font-bold rounded-xl bg-indigo-900 text-indigo-200 hover:bg-indigo-800 transition">
+                    <i class="fa-solid fa-book-open-reader mr-1"></i> 참여자 가이드
+                </button>
+                <button onclick="switchTab('admin')" id="btn-admin" class="flex-1 sm:flex-initial px-3.5 py-2 text-xs sm:text-sm font-bold rounded-xl bg-indigo-900 text-indigo-200 hover:bg-indigo-800 transition">
+                    <i class="fa-solid fa-sliders mr-1"></i> 관리자 수정
+                </button>
+                <button onclick="switchTab('github')" id="btn-github" class="flex-1 sm:flex-initial px-3.5 py-2 text-xs sm:text-sm font-bold rounded-xl bg-yellow-400 text-indigo-950 transition shadow">
+                    <i class="fa-brands fa-github mr-1"></i> GitHub 퍼블리싱
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6">
+
+        <!-- ================= 1. PARTICIPANT TAB (가독성 최우선 구조) ================= -->
+        <div id="tab-participant" class="tab-content space-y-6">
+            
+            <!-- Hero Notice Banner -->
+            <div class="bg-gradient-to-br from-indigo-900 via-indigo-800 to-blue-900 rounded-2xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-8 opacity-10 text-9xl pointer-events-none">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <div class="relative z-10 space-y-4">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-yellow-400 text-indigo-950 font-extrabold text-xs px-3 py-1 rounded-full uppercase">
+                            <i class="fa-regular fa-calendar-check mr-1"></i> 2026. 10. 28.(수) ~ 10. 29.(목) / 1박 2일
+                        </span>
+                        <span class="bg-white/15 backdrop-blur-sm text-white font-semibold text-xs px-3 py-1 rounded-full">
+                            수료기준: 총 13시간 100% 출석 필수 (지각·조퇴 시 감점)
+                        </span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-extrabold leading-tight">
+                        도시재생 사업추진 역량강화 및 부산 현장답사 가이드
+                    </h2>
+                    <p class="text-indigo-100 text-sm md:text-base max-w-3xl leading-relaxed">
+                        전국 지자체 도시재생 담당 공무원(30명 내외) 여러분을 환영합니다. 본 플랫폼에서 <strong>1일차 이론교육(아바니 센트럴 부산)</strong>과 <strong>2일차 현장답사(동래구·수영구 일원)</strong> 동선 및 숙박·교통 정보를 한눈에 확인하실 수 있습니다.
+                    </p>
+                    
+                    <!-- Quick Jump Buttons for Mobile Readability -->
+                    <div class="pt-2 flex flex-wrap gap-2">
+                        <a href="#section-schedule" class="bg-white text-indigo-900 hover:bg-yellow-300 font-bold text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center">
+                            <i class="fa-solid fa-clock mr-1.5 text-indigo-600"></i> 시간표 바로보기
+                        </a>
+                        <a href="#section-map" class="bg-white text-indigo-900 hover:bg-yellow-300 font-bold text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center">
+                            <i class="fa-solid fa-route mr-1.5 text-emerald-600"></i> 답사 동선 지도
+                        </a>
+                        <a href="#section-hotel" class="bg-white text-indigo-900 hover:bg-yellow-300 font-bold text-xs px-4 py-2.5 rounded-xl shadow transition flex items-center">
+                            <i class="fa-solid fa-bed mr-1.5 text-amber-600"></i> 추천 숙박 &amp; 복귀버스
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Summary 4-Grid (핵심 요약 카드) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 flex items-start space-x-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-lg shrink-0 font-bold">
+                        <i class="fa-solid fa-chalkboard-user"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-400 uppercase block">1일차 이론교육장</span>
+                        <h4 class="text-sm sm:text-base font-extrabold text-slate-800 mt-0.5">아바니 센트럴 부산</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">브릿지2홀 (남구 문현금융로)</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 flex items-start space-x-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg shrink-0 font-bold">
+                        <i class="fa-solid fa-map-signs"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-400 uppercase block">2일차 현장답사</span>
+                        <h4 class="text-sm sm:text-base font-extrabold text-slate-800 mt-0.5">동래구 · 수영구 일원</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">혁신어울림센터·비콘·F1963</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 flex items-start space-x-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shrink-0 font-bold">
+                        <i class="fa-solid fa-bus-simple"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-400 uppercase block">이동 및 복귀 수단</span>
+                        <h4 class="text-sm sm:text-base font-extrabold text-slate-800 mt-0.5">45인승 전용버스 배차</h4>
+                        <p class="text-xs text-slate-500 mt-0.5" id="summary-bus-route">F1963(16:30) → 부산역 → 부산종합버스터미널(노포역)</p>
+                    </div>
+                </div>
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200/80 flex items-start space-x-3.5">
+                    <div class="w-11 h-11 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center text-lg shrink-0 font-bold">
+                        <i class="fa-solid fa-gift"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-bold text-slate-400 uppercase block">참여자 기념품</span>
+                        <h4 class="text-sm sm:text-base font-extrabold text-slate-800 mt-0.5">부산 캐릭터 '부기' 7종</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">키링·볼펜·지도·떡메모지 등</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Schedule & Course Details -->
+            <div id="section-schedule" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                <!-- Left (7 cols): High-Readability Timeline Schedule -->
+                <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+                    <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-4 mb-5">
+                        <div>
+                            <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Curriculum &amp; Timetable</span>
+                            <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center mt-0.5">
+                                <i class="fa-solid fa-calendar-week text-indigo-600 mr-2"></i> 일자별 상세 교육 시간표
+                            </h3>
+                        </div>
+                        <!-- Day Switcher -->
+                        <div class="flex bg-slate-100 p-1 rounded-xl">
+                            <button onclick="setDayTab(1)" id="day1-btn" class="px-4 py-2 text-xs sm:text-sm font-extrabold rounded-lg bg-indigo-600 text-white shadow transition">
+                                1일차 (10/28 수) 이론
+                            </button>
+                            <button onclick="setDayTab(2)" id="day2-btn" class="px-4 py-2 text-xs sm:text-sm font-extrabold rounded-lg text-slate-600 hover:text-slate-900 transition">
+                                2일차 (10/29 목) 답사
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Day 1 Schedule List -->
+                    <div id="day1-content" class="space-y-3">
+                        <div class="bg-indigo-50/80 border border-indigo-100 rounded-xl p-3.5 flex items-center justify-between text-xs sm:text-sm text-indigo-950 font-semibold mb-4">
+                            <span><i class="fa-solid fa-location-dot text-indigo-600 mr-1.5"></i> <strong>장소:</strong> 아바니 센트럴 부산 브릿지2홀 (부산 남구 문현금융로 40)</span>
+                            <button onclick="focusPlaceOnMap(0)" class="text-indigo-700 hover:underline font-bold shrink-0 ml-2"><i class="fa-solid fa-map-pin mr-1"></i>지도보기</button>
+                        </div>
+                        <div id="participant-day1-list" class="space-y-3">
+                    <div class="border-l-4 border-slate-300 bg-slate-50/70 rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-slate-200 text-slate-700">등록</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>09:00 ~ 09:30</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">교육장 집결 및 등록 확인</h4>
+                            <p class="text-xs text-slate-500">아바니 센트럴 부산 브릿지2홀 출석체크 및 교재 배포</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 운영사무국
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-indigo-500 bg-white rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">이론 1</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>09:30 ~ 12:00</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">도시재생 정책 이해 및 활성화 계획 수립</h4>
+                            <p class="text-xs text-slate-500">도시재생 전략계획 및 활성화계획 수립 가이드라인 (2.5h)</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 박정은 책임연구원 (국토연구원)
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-slate-300 bg-slate-50/70 rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-slate-200 text-slate-700">식사</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>12:00 ~ 13:00</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">중식 (구내 및 인근 식당)</h4>
+                            <p class="text-xs text-slate-500">교육생 오찬 및 네트워킹</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 센트럴 세븐호텔 뷔페식
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-indigo-500 bg-white rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">이론 2</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>13:00 ~ 14:30</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">보조금 정산 절차 및 주요 주의사항</h4>
+                            <p class="text-xs text-slate-500">국고보조금 집행·관리 및 정산 실무 핵심 체크포인트 (1.5h)</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 김진래 대리 (주택도시보증공사)
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-indigo-500 bg-white rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">이론 3</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>14:30 ~ 16:00</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">도시재생사업 평가 및 성과관리 방안</h4>
+                            <p class="text-xs text-slate-500">추진실적 평가 대응 및 도시재생 성과관리 체계 이해 (1.5h)</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 이진희 연구위원 (국토연구원)
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-indigo-500 bg-white rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-indigo-100 text-indigo-700">이론 4</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>16:00 ~ 17:30</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">도시재생 사후관리 사례 및 실무 교육</h4>
+                            <p class="text-xs text-slate-500">마중물 사업 완료 후 거점시설 운영 및 사후관리 사례 (1.5h)</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 박성은 차장 (주택도시보증공사)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+
+                    <!-- Day 2 Schedule List -->
+                    <div id="day2-content" class="space-y-3 hidden">
+                        <div class="bg-emerald-50/80 border border-emerald-100 rounded-xl p-3.5 flex items-center justify-between text-xs sm:text-sm text-emerald-950 font-semibold mb-4">
+                            <span><i class="fa-solid fa-bus text-emerald-600 mr-1.5"></i> <strong>집합/이동:</strong> 09:00 숙소 앞 집결 후 전용버스 탑승 (동래구 → 수영구 코스)</span>
+                            <a href="#section-map" class="text-emerald-700 hover:underline font-bold shrink-0 ml-2"><i class="fa-solid fa-route mr-1"></i>노선보기</a>
+                        </div>
+                        <div id="participant-day2-list" class="space-y-3">
+                    <div class="border-l-4 border-slate-300 bg-slate-50/70 rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-slate-200 text-slate-700">이동</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>09:00 ~ 10:00</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">집결 및 동래구 현장답사지 이동</h4>
+                            <p class="text-xs text-slate-500">아바니 센트럴 부산 출발 → 동래구 혁신어울림센터 이동</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 45인승 전용버스 탑승
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-emerald-500 bg-white rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">답사 1</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>10:00 ~ 11:30</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">동래구 도시재생 거점시설 현장 투어</h4>
+                            <p class="text-xs text-slate-500">혁신어울림센터, 청년어울림센터, 작은도서관, 미디어놀이터 답사</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 동래구 도시재생현장지원센터
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-slate-300 bg-slate-50/70 rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-slate-200 text-slate-700">식사</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>11:40 ~ 12:40</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">중식 및 수영구 이동</h4>
+                            <p class="text-xs text-slate-500">중식 후 수영구 도시재생 현장으로 버스 이동</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 인근 식당 (쌈보보쌈 등)
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-emerald-500 bg-white rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">특강</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>13:30 ~ 14:00</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">수영구 도시재생 사업 Case-Study 특강</h4>
+                            <p class="text-xs text-slate-500">역사문화자원 활용 및 주민참여 기반 수영구 도시재생 사례 소개</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 이재민 사무국장 (수영구 센터)
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-emerald-500 bg-white rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">답사 2</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>14:00 ~ 16:00</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">수영구 주요 도시재생 현장 사례 투어</h4>
+                            <p class="text-xs text-slate-500">도도수영(수영사적공원) → B-CON그라운드 → 고려제강기념관 → F1963</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> 현장 전문가 동행 해설
+                            </span>
+                        </div>
+                    </div>
+                
+                    <div class="border-l-4 border-emerald-500 bg-white rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">수료/복귀</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>16:00 ~ 16:30</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">종합 강평 및 설문조사 · 기념촬영</h4>
+                            <p class="text-xs text-slate-500">기념품(부기 굿즈 7종) 지급 및 복귀 교통편(부산역·노포역) 탑승</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> HUG · 국토연구원 · 교육생 전원
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                    </div>
+                </div>
+
+                <!-- Right (5 cols): Field Trip Place Cards with Map Focus -->
+                <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+                    <div class="border-b border-slate-100 pb-4 mb-5">
+                        <span class="text-xs font-extrabold text-emerald-600 uppercase tracking-wider">Field Study Spots</span>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center mt-0.5">
+                            <i class="fa-solid fa-compass text-emerald-600 mr-2"></i> 주요 방문지 및 답사 포인트
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1">각 장소를 클릭하면 하단 지도에서 정확한 위치를 안내합니다.</p>
+                    </div>
+
+                    <div id="participant-places-cards" class="space-y-3 max-h-[540px] overflow-y-auto custom-scrollbar pr-1">
+                    <div onclick="focusPlaceOnMap(0)" class="cursor-pointer group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/50 hover:border-indigo-300 transition flex items-start space-x-3.5">
+                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow mt-0.5">
+                            1
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold text-slate-400 uppercase">출발지 · 이론교육·집결</span>
+                                <span class="text-xs text-indigo-600 font-bold group-hover:translate-x-0.5 transition"><i class="fa-solid fa-location-crosshairs mr-1"></i>지도 위치</span>
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5 truncate">아바니 센트럴 부산</h4>
+                            <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>부산 남구 문현금융로 40</p>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100">1일차 이론교육장(브릿지2홀) 및 2일차 집결 출발지</p>
+                        </div>
+                    </div>
+                
+                    <div onclick="focusPlaceOnMap(1)" class="cursor-pointer group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/50 hover:border-indigo-300 transition flex items-start space-x-3.5">
+                        <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow mt-0.5">
+                            2
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold text-slate-400 uppercase">경유지 · 동래구 거점</span>
+                                <span class="text-xs text-indigo-600 font-bold group-hover:translate-x-0.5 transition"><i class="fa-solid fa-location-crosshairs mr-1"></i>지도 위치</span>
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5 truncate">동래구 혁신어울림센터</h4>
+                            <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>부산 동래구 온천장로 119</p>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100">쇠퇴한 온천장 지역 활성화 및 세대 간 소통을 이끄는 복합 거점 공간</p>
+                        </div>
+                    </div>
+                
+                    <div onclick="focusPlaceOnMap(2)" class="cursor-pointer group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/50 hover:border-indigo-300 transition flex items-start space-x-3.5">
+                        <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow mt-0.5">
+                            3
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold text-slate-400 uppercase">경유지 · 수영구 답사1</span>
+                                <span class="text-xs text-indigo-600 font-bold group-hover:translate-x-0.5 transition"><i class="fa-solid fa-location-crosshairs mr-1"></i>지도 위치</span>
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5 truncate">도도수영 &amp; 수영사적공원</h4>
+                            <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>부산 수영구 수영성로 43</p>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100">역사문화자원을 활용한 지역 활성화 및 공동체 회복 도시재생 거점</p>
+                        </div>
+                    </div>
+                
+                    <div onclick="focusPlaceOnMap(3)" class="cursor-pointer group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/50 hover:border-indigo-300 transition flex items-start space-x-3.5">
+                        <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow mt-0.5">
+                            4
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold text-slate-400 uppercase">경유지 · 수영구 답사2</span>
+                                <span class="text-xs text-indigo-600 font-bold group-hover:translate-x-0.5 transition"><i class="fa-solid fa-location-crosshairs mr-1"></i>지도 위치</span>
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5 truncate">B-CON 그라운드 (비콘)</h4>
+                            <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>부산 수영구 망미번영로 55</p>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100">수영고가도로 하부 유휴부지를 컨테이너로 재생한 복합생활문화공간</p>
+                        </div>
+                    </div>
+                
+                    <div onclick="focusPlaceOnMap(4)" class="cursor-pointer group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/50 hover:border-indigo-300 transition flex items-start space-x-3.5">
+                        <div class="w-8 h-8 rounded-full bg-red-600 text-white font-extrabold text-sm flex items-center justify-center shrink-0 shadow mt-0.5">
+                            5
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold text-slate-400 uppercase">목적지 · 최종목적지</span>
+                                <span class="text-xs text-indigo-600 font-bold group-hover:translate-x-0.5 transition"><i class="fa-solid fa-location-crosshairs mr-1"></i>지도 위치</span>
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5 truncate">F1963 (고려제강 기념관)</h4>
+                            <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>부산 수영구 구락로123번길 20</p>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100">민관 협업을 통해 폐와이어 공장을 리노베이션한 세계적 복합문화공간</p>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Section: Interactive Map & Sequential Route -->
+            <div id="section-map" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                    <div>
+                        <span class="text-xs font-extrabold text-indigo-600 uppercase tracking-wider">Interactive Route Map</span>
+                        <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 flex items-center mt-0.5">
+                            <i class="fa-solid fa-map-location-dot text-indigo-600 mr-2"></i> 순차적 현장답사 동선 및 위치 지도
+                        </h3>
+                    </div>
+                    <!-- Route Legend & Quick Fit Button -->
+                    <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+                        <span class="flex items-center bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg border border-blue-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-blue-600 mr-1.5"></span> 출발지
+                        </span>
+                        <span class="flex items-center bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 mr-1.5"></span> 경유지
+                        </span>
+                        <span class="flex items-center bg-red-50 text-red-700 px-2.5 py-1 rounded-lg border border-red-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-600 mr-1.5"></span> 최종목적지
+                        </span>
+                        <button onclick="fitAllMarkers()" class="bg-slate-800 hover:bg-slate-700 text-white px-3 py-1.5 rounded-lg transition shadow-sm ml-1">
+                            <i class="fa-solid fa-expand mr-1"></i> 전체 경로 한눈에 보기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step-by-Step Route Bar -->
+                <div id="route-step-bar" class="flex flex-wrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/80 mb-4 text-xs">
+                    <button onclick="focusPlaceOnMap(0)" class="flex items-center space-x-1.5 bg-white hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm transition">
+                        <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-[11px] font-extrabold flex items-center justify-center">1</span>
+                        <span class="font-bold text-slate-800">아바니 센트럴 부산</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+                
+                    <button onclick="focusPlaceOnMap(1)" class="flex items-center space-x-1.5 bg-white hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm transition">
+                        <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-extrabold flex items-center justify-center">2</span>
+                        <span class="font-bold text-slate-800">동래구 혁신어울림센터</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+                
+                    <button onclick="focusPlaceOnMap(2)" class="flex items-center space-x-1.5 bg-white hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm transition">
+                        <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-extrabold flex items-center justify-center">3</span>
+                        <span class="font-bold text-slate-800">도도수영 &amp; 수영사적공원</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+                
+                    <button onclick="focusPlaceOnMap(3)" class="flex items-center space-x-1.5 bg-white hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm transition">
+                        <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-extrabold flex items-center justify-center">4</span>
+                        <span class="font-bold text-slate-800">B-CON 그라운드 (비콘)</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+                
+                    <button onclick="focusPlaceOnMap(4)" class="flex items-center space-x-1.5 bg-white hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm transition">
+                        <span class="w-5 h-5 rounded-full bg-red-600 text-white text-[11px] font-extrabold flex items-center justify-center">5</span>
+                        <span class="font-bold text-slate-800">F1963 (고려제강 기념관)</span>
+                    </button>
+                    
+                </div>
+
+                <!-- Map Container -->
+                <div class="w-full h-[460px] rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+                    <div id="map" class="leaflet-container leaflet-touch leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" tabindex="0" style="position: relative;"><div class="leaflet-pane leaflet-map-pane" style="transform: translate3d(0px, 69px, 0px);"><div class="leaflet-pane leaflet-tile-pane"><div class="leaflet-layer " style="z-index: 1; opacity: 1;"><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 15; transform: translate3d(-2852px, -328px, 0px) scale(8);"></div><div class="leaflet-tile-container leaflet-zoom-animated" style="z-index: 18; transform: translate3d(0px, 0px, 0px) scale(1);"><img alt="" src="https://c.tile.openstreetmap.org/15/28131/12962.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(212px, -48px, 0px); opacity: 1;"><img alt="" src="https://a.tile.openstreetmap.org/15/28132/12962.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(468px, -48px, 0px); opacity: 1;"><img alt="" src="https://b.tile.openstreetmap.org/15/28131/12961.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(212px, -304px, 0px); opacity: 1;"><img alt="" src="https://c.tile.openstreetmap.org/15/28132/12961.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(468px, -304px, 0px); opacity: 1;"><img alt="" src="https://a.tile.openstreetmap.org/15/28131/12963.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(212px, 208px, 0px); opacity: 1;"><img alt="" src="https://b.tile.openstreetmap.org/15/28132/12963.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(468px, 208px, 0px); opacity: 1;"><img alt="" src="https://b.tile.openstreetmap.org/15/28130/12962.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-44px, -48px, 0px); opacity: 1;"><img alt="" src="https://b.tile.openstreetmap.org/15/28133/12962.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(724px, -48px, 0px); opacity: 1;"><img alt="" src="https://a.tile.openstreetmap.org/15/28130/12961.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-44px, -304px, 0px); opacity: 1;"><img alt="" src="https://a.tile.openstreetmap.org/15/28133/12961.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(724px, -304px, 0px); opacity: 1;"><img alt="" src="https://c.tile.openstreetmap.org/15/28130/12963.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(-44px, 208px, 0px); opacity: 1;"><img alt="" src="https://c.tile.openstreetmap.org/15/28133/12963.png" class="leaflet-tile leaflet-tile-loaded" style="width: 256px; height: 256px; transform: translate3d(724px, 208px, 0px); opacity: 1;"></div></div></div><div class="leaflet-pane leaflet-overlay-pane"><svg pointer-events="none" class="leaflet-zoom-animated" width="1019" height="552" viewBox="-85 -115 1019 552" style="transform: translate3d(-85px, -115px, 0px);"><g><path class="leaflet-interactive" stroke="#4f46e5" stroke-opacity="0.85" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8, 8" fill="none" d="M424 161L478 -115"></path></g></svg></div><div class="leaflet-pane leaflet-shadow-pane"></div><div class="leaflet-pane leaflet-marker-pane"><div class="leaflet-marker-icon custom-routing-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -17px; margin-top: -17px; width: 34px; height: 34px; transform: translate3d(424px, 161px, 0px); z-index: 161;"><div style="background-color: #2563eb; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); border: 3px solid white;">1</div></div><div class="leaflet-marker-icon custom-routing-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -17px; margin-top: -17px; width: 34px; height: 34px; transform: translate3d(820px, -1863px, 0px); z-index: -1863;"><div style="background-color: #059669; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); border: 3px solid white;">2</div></div><div class="leaflet-marker-icon custom-routing-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -17px; margin-top: -17px; width: 34px; height: 34px; transform: translate3d(1571px, -474px, 0px); z-index: -474;"><div style="background-color: #059669; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); border: 3px solid white;">3</div></div><div class="leaflet-marker-icon custom-routing-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -17px; margin-top: -17px; width: 34px; height: 34px; transform: translate3d(1489px, -588px, 0px); z-index: -588;"><div style="background-color: #059669; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); border: 3px solid white;">4</div></div><div class="leaflet-marker-icon custom-routing-icon leaflet-zoom-animated leaflet-interactive" tabindex="0" role="button" style="margin-left: -17px; margin-top: -17px; width: 34px; height: 34px; transform: translate3d(1575px, -640px, 0px); z-index: -640;"><div style="background-color: #dc2626; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); border: 3px solid white;">5</div></div></div><div class="leaflet-pane leaflet-tooltip-pane"></div><div class="leaflet-pane leaflet-popup-pane"><div class="leaflet-popup  leaflet-zoom-animated" style="opacity: 1; transform: translate3d(424px, 161px, 0px); bottom: -7px; left: -150px;"><div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="width: 253px;">
+                        <div style="font-family:'Pretendard',sans-serif; min-width:210px; padding:2px;">
+                            <span style="background:#2563eb; color:white; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px;">1번째 · 출발지</span>
+                            <h4 style="font-size:14px; font-weight:800; margin:6px 0 2px; color:#0f172a;">아바니 센트럴 부산</h4>
+                            <p style="font-size:11px; color:#64748b; margin:0 0 6px;">부산 남구 문현금융로 40</p>
+                            <p style="font-size:12px; color:#334155; margin:0; line-height:1.4;">1일차 이론교육장(브릿지2홀) 및 2일차 집결 출발지</p>
+                        </div>
+                    </div></div><div class="leaflet-popup-tip-container"><div class="leaflet-popup-tip"></div></div><a class="leaflet-popup-close-button" role="button" aria-label="Close popup" href="#close"><span aria-hidden="true">×</span></a></div></div><div class="leaflet-proxy leaflet-zoom-animated" style="transform: translate3d(7.20175e+06px, 3.31848e+06px, 0px) scale(16384);"></div></div><div class="leaflet-control-container"><div class="leaflet-top leaflet-left"><div class="leaflet-control-zoom leaflet-bar leaflet-control"><a class="leaflet-control-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in" aria-disabled="false"><span aria-hidden="true">+</span></a><a class="leaflet-control-zoom-out" href="#" title="Zoom out" role="button" aria-label="Zoom out" aria-disabled="false"><span aria-hidden="true">−</span></a></div></div><div class="leaflet-top leaflet-right"></div><div class="leaflet-bottom leaflet-left"></div><div class="leaflet-bottom leaflet-right"><div class="leaflet-control-attribution leaflet-control"><a href="https://leafletjs.com" title="A JavaScript library for interactive maps"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"></path><path fill="#FFD500" d="M0 4h12v3H0z"></path><path fill="#E0BC00" d="M0 7h12v1H0z"></path></svg> Leaflet</a> <span aria-hidden="true">|</span> © OpenStreetMap contributors</div></div></div></div>
+                </div>
+            </div>
+
+            <!-- Section: Accommodation, Bus & Emergency Contacts -->
+            <div id="section-hotel" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Recommended Budget Hotels (7 cols) -->
+                <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
+                        <div>
+                            <span class="text-xs font-extrabold text-amber-600 uppercase tracking-wider">Accommodation Guide</span>
+                            <h3 class="text-lg font-extrabold text-slate-900 flex items-center mt-0.5">
+                                <i class="fa-solid fa-hotel text-amber-500 mr-2"></i> 교육장 인근 숙박 추천 리스트 (여비 규정 내)
+                            </h3>
+                        </div>
+                        <span class="bg-amber-100 text-amber-800 text-xs font-extrabold px-2.5 py-1 rounded-lg">공무원 여비 조견표 기준</span>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">
+                        * 교육생 개별 숙박 예약 시 참고하실 수 있는 아바니 센트럴 부산(문현역) 및 서면·범내골역 인근 가성비 우수 호텔 목록입니다.
+                    </p>
+                    <div id="participant-hotel-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between space-y-2 hover:border-amber-300 transition">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <h4 class="font-extrabold text-slate-900 text-sm">아바니 센트럴 부산 (교육장 당해 건물)</h4>
+                                <span class="bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2 py-0.5 rounded shrink-0">★ 4.8</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-train-subway mr-1 text-slate-400"></i>남구 문현금융로 (문현역)</p>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center text-xs">
+                            <span class="text-slate-500">1일차 교육장 내 위치</span>
+                            <strong class="text-indigo-700 font-extrabold">공무원 협약가 문의</strong>
+                        </div>
+                    </div>
+                
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between space-y-2 hover:border-amber-300 transition">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <h4 class="font-extrabold text-slate-900 text-sm">부산 비즈니스 호텔</h4>
+                                <span class="bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2 py-0.5 rounded shrink-0">★ 4.5</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-train-subway mr-1 text-slate-400"></i>부산진구 부전동 (서면역)</p>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center text-xs">
+                            <span class="text-slate-500">여비 상한액 내 추천</span>
+                            <strong class="text-indigo-700 font-extrabold">70,000원대</strong>
+                        </div>
+                    </div>
+                
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between space-y-2 hover:border-amber-300 transition">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <h4 class="font-extrabold text-slate-900 text-sm">호텔 토요코인 부산서면</h4>
+                                <span class="bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2 py-0.5 rounded shrink-0">★ 4.6</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-train-subway mr-1 text-slate-400"></i>부산진구 서전로 (서면역)</p>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center text-xs">
+                            <span class="text-slate-500">조식 무료·문현역 2정거장</span>
+                            <strong class="text-indigo-700 font-extrabold">65,000원대</strong>
+                        </div>
+                    </div>
+                
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between space-y-2 hover:border-amber-300 transition">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <h4 class="font-extrabold text-slate-900 text-sm">아너스 호텔 부산</h4>
+                                <span class="bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2 py-0.5 rounded shrink-0">★ 4.3</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-train-subway mr-1 text-slate-400"></i>부산진구 범천동 (범내골역)</p>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center text-xs">
+                            <span class="text-slate-500">교육장 도보/지하철 인접</span>
+                            <strong class="text-indigo-700 font-extrabold">60,000원대</strong>
+                        </div>
+                    </div>
+                </div>
+                </div>
+
+                <!-- Return Bus & Emergency Contacts (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <!-- Bus & Souvenir Box -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 space-y-4">
+                        <h3 class="text-base font-extrabold text-slate-900 flex items-center border-b border-slate-100 pb-3">
+                            <i class="fa-solid fa-shuttle-space text-indigo-600 mr-2"></i> 복귀 교통편 및 기념품 안내
+                        </h3>
+                        <div class="bg-indigo-50/70 p-4 rounded-xl border border-indigo-100 space-y-2 text-xs sm:text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500 font-semibold">배차 차량</span>
+                                <span class="font-extrabold text-indigo-950" id="part-bus-type">45인승 대형버스 (1대)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500 font-semibold">복귀 노선</span>
+                                <span class="font-extrabold text-indigo-700 text-right" id="part-bus-route">F1963(16:30) → 부산역 → 부산종합버스터미널(노포역)</span>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-extrabold text-slate-500 uppercase mb-2">제공 기념품 (부산 소통캐릭터 '부기' 굿즈 7종)</h4>
+                            <div class="flex flex-wrap gap-1.5 text-xs font-semibold text-slate-700">
+                                <span class="bg-slate-100 px-2.5 py-1 rounded-lg">1. 한복아크릴 키링</span>
+                                <span class="bg-slate-100 px-2.5 py-1 rounded-lg">2. 캐릭터 볼펜</span>
+                                <span class="bg-slate-100 px-2.5 py-1 rounded-lg">3. 부산 관광지도</span>
+                                <span class="bg-slate-100 px-2.5 py-1 rounded-lg">4. 포스트잇</span>
+                                <span class="bg-slate-100 px-2.5 py-1 rounded-lg">5. 떡메모지</span>
+                                <span class="bg-slate-100 px-2.5 py-1 rounded-lg">6. 스티커 &amp; 엽서 세트</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Call Box -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-red-100 p-5 sm:p-6">
+                        <h3 class="text-base font-extrabold text-slate-900 flex items-center border-b border-slate-100 pb-3 mb-3">
+                            <i class="fa-solid fa-phone-volume text-red-600 mr-2"></i> 현장 운영진 및 비상연락망
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                            <a href="tel:010-5315-4683" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-red-50 border border-slate-200 transition">
+                                <div>
+                                    <span class="text-[11px] text-slate-400 font-bold block">수영구 도시재생센터</span>
+                                    <strong class="text-slate-800">이재민 사무국장</strong>
+                                </div>
+                                <span class="bg-red-100 text-red-700 font-extrabold px-2 py-1 rounded-lg"><i class="fa-solid fa-phone mr-1"></i>전화</span>
+                            </a>
+                            <a href="tel:010-5832-2610" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-red-50 border border-slate-200 transition">
+                                <div>
+                                    <span class="text-[11px] text-slate-400 font-bold block">봉산마을 현장지원</span>
+                                    <strong class="text-slate-800">양인호 팀장</strong>
+                                </div>
+                                <span class="bg-red-100 text-red-700 font-extrabold px-2 py-1 rounded-lg"><i class="fa-solid fa-phone mr-1"></i>전화</span>
+                            </a>
+                            <a href="tel:010-4052-1199" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-red-50 border border-slate-200 transition">
+                                <div>
+                                    <span class="text-[11px] text-slate-400 font-bold block">응급환자이송단</span>
+                                    <strong class="text-slate-800">김동환 대표</strong>
+                                </div>
+                                <span class="bg-red-100 text-red-700 font-extrabold px-2 py-1 rounded-lg"><i class="fa-solid fa-truck-medical mr-1"></i>호출</span>
+                            </a>
+                            <a href="tel:02-998-2316" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 transition">
+                                <div>
+                                    <span class="text-[11px] text-slate-400 font-bold block">교육 운영사무국</span>
+                                    <strong class="text-slate-800">이엔아이그룹</strong>
+                                </div>
+                                <span class="bg-indigo-100 text-indigo-700 font-extrabold px-2 py-1 rounded-lg"><i class="fa-solid fa-headset mr-1"></i>문의</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 2. ADMIN DASHBOARD TAB ================= -->
+        <div id="tab-admin" class="tab-content space-y-6">
+            <div class="bg-slate-900 rounded-2xl p-6 md:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <span class="bg-indigo-500 text-white font-bold text-xs px-3 py-1 rounded-full uppercase tracking-wider">관리자 실시간 제어 센터</span>
+                    <h2 class="text-xl md:text-2xl font-extrabold mt-2">교육 시간표 · 순차적 답사 코스 · 추천 숙박 통합 관리</h2>
+                    <p class="text-slate-400 text-xs sm:text-sm mt-1">이곳에서 일정을 수정하거나 방문지 순서를 위/아래로 변경하면 <strong>참여자 가이드와 지도에 즉시 반영</strong>됩니다.</p>
+                </div>
+                <div class="flex space-x-2.5 w-full md:w-auto">
+                    <button onclick="resetAdminData()" class="flex-1 md:flex-initial bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2.5 text-xs sm:text-sm rounded-xl font-bold border border-slate-700 transition">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> 초기값 복원
+                    </button>
+                    <button onclick="saveAdminData()" class="flex-1 md:flex-initial bg-yellow-400 hover:bg-yellow-300 text-indigo-950 px-5 py-2.5 text-xs sm:text-sm rounded-xl font-extrabold shadow transition">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i> 변경사항 즉시 적용
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Left: Schedule & Course Manager -->
+                <div class="lg:col-span-7 space-y-6">
+                    <!-- Schedule Editor -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                        <div class="flex justify-between items-center border-b pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center">
+                                    <i class="fa-solid fa-calendar-check text-indigo-600 mr-2"></i> 1·2일차 교육 일정 편집
+                                </h3>
+                                <p class="text-xs text-slate-500">시간, 과목명, 강사 및 세부안내를 자유롭게 수정하세요.</p>
+                            </div>
+                            <button onclick="addScheduleItem()" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-2 rounded-xl font-extrabold hover:bg-indigo-100 transition">
+                                <i class="fa-solid fa-plus mr-1"></i> 일정 추가
+                            </button>
+                        </div>
+                        <div id="admin-schedule-list" class="space-y-2.5 max-h-[340px] overflow-y-auto custom-scrollbar pr-1">
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-0" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1" selected="">1일차</option>
+                            <option value="2">2일차</option>
+                        </select>
+                        <input type="text" value="09:00 ~ 09:30" id="sch-time-0" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="교육장 집결 및 등록 확인" id="sch-title-0" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="운영사무국" id="sch-speaker-0" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(0)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-1" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1" selected="">1일차</option>
+                            <option value="2">2일차</option>
+                        </select>
+                        <input type="text" value="09:30 ~ 12:00" id="sch-time-1" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="도시재생 정책 이해 및 활성화 계획 수립" id="sch-title-1" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="박정은 책임연구원 (국토연구원)" id="sch-speaker-1" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(1)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-2" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1" selected="">1일차</option>
+                            <option value="2">2일차</option>
+                        </select>
+                        <input type="text" value="12:00 ~ 13:00" id="sch-time-2" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="중식 (구내 및 인근 식당)" id="sch-title-2" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="센트럴 세븐호텔 뷔페식" id="sch-speaker-2" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(2)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-3" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1" selected="">1일차</option>
+                            <option value="2">2일차</option>
+                        </select>
+                        <input type="text" value="13:00 ~ 14:30" id="sch-time-3" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="보조금 정산 절차 및 주요 주의사항" id="sch-title-3" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="김진래 대리 (주택도시보증공사)" id="sch-speaker-3" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(3)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-4" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1" selected="">1일차</option>
+                            <option value="2">2일차</option>
+                        </select>
+                        <input type="text" value="14:30 ~ 16:00" id="sch-time-4" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="도시재생사업 평가 및 성과관리 방안" id="sch-title-4" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="이진희 연구위원 (국토연구원)" id="sch-speaker-4" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(4)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-5" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1" selected="">1일차</option>
+                            <option value="2">2일차</option>
+                        </select>
+                        <input type="text" value="16:00 ~ 17:30" id="sch-time-5" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="도시재생 사후관리 사례 및 실무 교육" id="sch-title-5" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="박성은 차장 (주택도시보증공사)" id="sch-speaker-5" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(5)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-6" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1">1일차</option>
+                            <option value="2" selected="">2일차</option>
+                        </select>
+                        <input type="text" value="09:00 ~ 10:00" id="sch-time-6" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="집결 및 동래구 현장답사지 이동" id="sch-title-6" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="45인승 전용버스 탑승" id="sch-speaker-6" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(6)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-7" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1">1일차</option>
+                            <option value="2" selected="">2일차</option>
+                        </select>
+                        <input type="text" value="10:00 ~ 11:30" id="sch-time-7" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="동래구 도시재생 거점시설 현장 투어" id="sch-title-7" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="동래구 도시재생현장지원센터" id="sch-speaker-7" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(7)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-8" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1">1일차</option>
+                            <option value="2" selected="">2일차</option>
+                        </select>
+                        <input type="text" value="11:40 ~ 12:40" id="sch-time-8" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="중식 및 수영구 이동" id="sch-title-8" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="인근 식당 (쌈보보쌈 등)" id="sch-speaker-8" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(8)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-9" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1">1일차</option>
+                            <option value="2" selected="">2일차</option>
+                        </select>
+                        <input type="text" value="13:30 ~ 14:00" id="sch-time-9" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="수영구 도시재생 사업 Case-Study 특강" id="sch-title-9" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="이재민 사무국장 (수영구 센터)" id="sch-speaker-9" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(9)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-10" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1">1일차</option>
+                            <option value="2" selected="">2일차</option>
+                        </select>
+                        <input type="text" value="14:00 ~ 16:00" id="sch-time-10" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="수영구 주요 도시재생 현장 사례 투어" id="sch-title-10" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="현장 전문가 동행 해설" id="sch-speaker-10" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(10)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-11" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1">1일차</option>
+                            <option value="2" selected="">2일차</option>
+                        </select>
+                        <input type="text" value="16:00 ~ 16:30" id="sch-time-11" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="종합 강평 및 설문조사 · 기념촬영" id="sch-title-11" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="HUG · 국토연구원 · 교육생 전원" id="sch-speaker-11" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(11)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+                    </div>
+
+                    <!-- Sequential Course Places Editor -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                        <div class="flex justify-between items-center border-b pb-4">
+                            <div>
+                                <h3 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center">
+                                    <i class="fa-solid fa-route text-emerald-600 mr-2"></i> 순차적 방문지 코스 편집 (출발 → 경유 → 목적지)
+                                </h3>
+                                <p class="text-xs text-slate-500">순서를 변경하면 지도 위의 번호 마커(1, 2, 3...)와 점선 경로가 자동으로 재연결됩니다.</p>
+                            </div>
+                            <button onclick="addCoursePlace()" class="text-xs bg-emerald-50 text-emerald-700 px-3 py-2 rounded-xl font-extrabold hover:bg-emerald-100 transition">
+                                <i class="fa-solid fa-plus mr-1"></i> 방문지 추가
+                            </button>
+                        </div>
+                        <div id="admin-course-list" class="space-y-3 max-h-[420px] overflow-y-auto custom-scrollbar pr-1">
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 flex-1">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold shrink-0">1</span>
+                                <select id="pl-type-0" class="font-extrabold border rounded-lg px-2 py-1.5 bg-blue-50 text-blue-700 border-blue-200">
+                                    <option value="출발지" selected="">출발지</option>
+                                    <option value="경유지">경유지</option>
+                                    <option value="목적지">목적지</option>
+                                </select>
+                                <input type="text" value="아바니 센트럴 부산" id="pl-name-0" placeholder="방문지명" class="font-extrabold border rounded-lg px-2.5 py-1.5 bg-white flex-1">
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="movePlace(0, -1)" disabled="" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-up"></i></button>
+                                <button onclick="movePlace(0, 1)" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-down"></i></button>
+                                <button onclick="removePlace(0)" class="p-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" value="부산 남구 문현금융로 40" id="pl-addr-0" placeholder="상세 주소" class="border rounded-lg px-2.5 py-1.5 bg-white sm:col-span-2">
+                            <div class="flex space-x-1">
+                                <input type="text" value="35.1485" id="pl-lat-0" placeholder="위도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                                <input type="text" value="129.0655" id="pl-lng-0" placeholder="경도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                            </div>
+                        </div>
+                        <input type="text" value="1일차 이론교육장(브릿지2홀) 및 2일차 집결 출발지" id="pl-desc-0" placeholder="답사 포인트 설명" class="w-full border rounded-lg px-2.5 py-1.5 bg-white text-slate-600">
+                    </div>
+                
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 flex-1">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold shrink-0">2</span>
+                                <select id="pl-type-1" class="font-extrabold border rounded-lg px-2 py-1.5 bg-emerald-50 text-emerald-700 border-emerald-200">
+                                    <option value="출발지">출발지</option>
+                                    <option value="경유지" selected="">경유지</option>
+                                    <option value="목적지">목적지</option>
+                                </select>
+                                <input type="text" value="동래구 혁신어울림센터" id="pl-name-1" placeholder="방문지명" class="font-extrabold border rounded-lg px-2.5 py-1.5 bg-white flex-1">
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="movePlace(1, -1)" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-up"></i></button>
+                                <button onclick="movePlace(1, 1)" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-down"></i></button>
+                                <button onclick="removePlace(1)" class="p-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" value="부산 동래구 온천장로 119" id="pl-addr-1" placeholder="상세 주소" class="border rounded-lg px-2.5 py-1.5 bg-white sm:col-span-2">
+                            <div class="flex space-x-1">
+                                <input type="text" value="35.2195" id="pl-lat-1" placeholder="위도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                                <input type="text" value="129.0825" id="pl-lng-1" placeholder="경도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                            </div>
+                        </div>
+                        <input type="text" value="쇠퇴한 온천장 지역 활성화 및 세대 간 소통을 이끄는 복합 거점 공간" id="pl-desc-1" placeholder="답사 포인트 설명" class="w-full border rounded-lg px-2.5 py-1.5 bg-white text-slate-600">
+                    </div>
+                
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 flex-1">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold shrink-0">3</span>
+                                <select id="pl-type-2" class="font-extrabold border rounded-lg px-2 py-1.5 bg-emerald-50 text-emerald-700 border-emerald-200">
+                                    <option value="출발지">출발지</option>
+                                    <option value="경유지" selected="">경유지</option>
+                                    <option value="목적지">목적지</option>
+                                </select>
+                                <input type="text" value="도도수영 &amp; 수영사적공원" id="pl-name-2" placeholder="방문지명" class="font-extrabold border rounded-lg px-2.5 py-1.5 bg-white flex-1">
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="movePlace(2, -1)" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-up"></i></button>
+                                <button onclick="movePlace(2, 1)" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-down"></i></button>
+                                <button onclick="removePlace(2)" class="p-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" value="부산 수영구 수영성로 43" id="pl-addr-2" placeholder="상세 주소" class="border rounded-lg px-2.5 py-1.5 bg-white sm:col-span-2">
+                            <div class="flex space-x-1">
+                                <input type="text" value="35.1708" id="pl-lat-2" placeholder="위도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                                <input type="text" value="129.1147" id="pl-lng-2" placeholder="경도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                            </div>
+                        </div>
+                        <input type="text" value="역사문화자원을 활용한 지역 활성화 및 공동체 회복 도시재생 거점" id="pl-desc-2" placeholder="답사 포인트 설명" class="w-full border rounded-lg px-2.5 py-1.5 bg-white text-slate-600">
+                    </div>
+                
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 flex-1">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold shrink-0">4</span>
+                                <select id="pl-type-3" class="font-extrabold border rounded-lg px-2 py-1.5 bg-emerald-50 text-emerald-700 border-emerald-200">
+                                    <option value="출발지">출발지</option>
+                                    <option value="경유지" selected="">경유지</option>
+                                    <option value="목적지">목적지</option>
+                                </select>
+                                <input type="text" value="B-CON 그라운드 (비콘)" id="pl-name-3" placeholder="방문지명" class="font-extrabold border rounded-lg px-2.5 py-1.5 bg-white flex-1">
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="movePlace(3, -1)" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-up"></i></button>
+                                <button onclick="movePlace(3, 1)" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-down"></i></button>
+                                <button onclick="removePlace(3)" class="p-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" value="부산 수영구 망미번영로 55" id="pl-addr-3" placeholder="상세 주소" class="border rounded-lg px-2.5 py-1.5 bg-white sm:col-span-2">
+                            <div class="flex space-x-1">
+                                <input type="text" value="35.1748" id="pl-lat-3" placeholder="위도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                                <input type="text" value="129.1112" id="pl-lng-3" placeholder="경도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                            </div>
+                        </div>
+                        <input type="text" value="수영고가도로 하부 유휴부지를 컨테이너로 재생한 복합생활문화공간" id="pl-desc-3" placeholder="답사 포인트 설명" class="w-full border rounded-lg px-2.5 py-1.5 bg-white text-slate-600">
+                    </div>
+                
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 flex-1">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold shrink-0">5</span>
+                                <select id="pl-type-4" class="font-extrabold border rounded-lg px-2 py-1.5 bg-red-50 text-red-700 border-red-200">
+                                    <option value="출발지">출발지</option>
+                                    <option value="경유지">경유지</option>
+                                    <option value="목적지" selected="">목적지</option>
+                                </select>
+                                <input type="text" value="F1963 (고려제강 기념관)" id="pl-name-4" placeholder="방문지명" class="font-extrabold border rounded-lg px-2.5 py-1.5 bg-white flex-1">
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="movePlace(4, -1)" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-up"></i></button>
+                                <button onclick="movePlace(4, 1)" disabled="" class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-down"></i></button>
+                                <button onclick="removePlace(4)" class="p-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" value="부산 수영구 구락로123번길 20" id="pl-addr-4" placeholder="상세 주소" class="border rounded-lg px-2.5 py-1.5 bg-white sm:col-span-2">
+                            <div class="flex space-x-1">
+                                <input type="text" value="35.1766" id="pl-lat-4" placeholder="위도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                                <input type="text" value="129.1149" id="pl-lng-4" placeholder="경도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                            </div>
+                        </div>
+                        <input type="text" value="민관 협업을 통해 폐와이어 공장을 리노베이션한 세계적 복합문화공간" id="pl-desc-4" placeholder="답사 포인트 설명" class="w-full border rounded-lg px-2.5 py-1.5 bg-white text-slate-600">
+                    </div>
+                </div>
+                    </div>
+                </div>
+
+                <!-- Right: Hotel & Bus Manager -->
+                <div class="lg:col-span-5 space-y-6">
+                    <!-- Accommodation Editor -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                        <div class="flex justify-between items-center border-b pb-4">
+                            <h3 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center">
+                                <i class="fa-solid fa-hotel text-amber-500 mr-2"></i> 추천 숙박시설 목록 관리
+                            </h3>
+                            <button onclick="addHotel()" class="text-xs bg-amber-50 text-amber-700 px-3 py-2 rounded-xl font-extrabold hover:bg-amber-100 transition">
+                                <i class="fa-solid fa-plus mr-1"></i> 숙소 추가
+                            </button>
+                        </div>
+                        <div id="admin-hotel-list" class="space-y-2.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1">
+                    <div class="flex items-center space-x-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <input type="text" value="아바니 센트럴 부산 (교육장 당해 건물)" id="ht-name-0" class="flex-1 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="호텔명">
+                        <input type="text" value="남구 문현금융로 (문현역)" id="ht-area-0" class="w-28 border rounded-lg px-2 py-1.5 bg-white" placeholder="위치">
+                        <input type="text" value="공무원 협약가 문의" id="ht-price-0" class="w-24 border rounded-lg px-2 py-1.5 bg-white text-center font-bold" placeholder="가격대">
+                        <button onclick="removeHotel(0)" class="text-red-500 hover:text-red-700 p-1.5"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex items-center space-x-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <input type="text" value="부산 비즈니스 호텔" id="ht-name-1" class="flex-1 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="호텔명">
+                        <input type="text" value="부산진구 부전동 (서면역)" id="ht-area-1" class="w-28 border rounded-lg px-2 py-1.5 bg-white" placeholder="위치">
+                        <input type="text" value="70,000원대" id="ht-price-1" class="w-24 border rounded-lg px-2 py-1.5 bg-white text-center font-bold" placeholder="가격대">
+                        <button onclick="removeHotel(1)" class="text-red-500 hover:text-red-700 p-1.5"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex items-center space-x-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <input type="text" value="호텔 토요코인 부산서면" id="ht-name-2" class="flex-1 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="호텔명">
+                        <input type="text" value="부산진구 서전로 (서면역)" id="ht-area-2" class="w-28 border rounded-lg px-2 py-1.5 bg-white" placeholder="위치">
+                        <input type="text" value="65,000원대" id="ht-price-2" class="w-24 border rounded-lg px-2 py-1.5 bg-white text-center font-bold" placeholder="가격대">
+                        <button onclick="removeHotel(2)" class="text-red-500 hover:text-red-700 p-1.5"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                
+                    <div class="flex items-center space-x-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <input type="text" value="아너스 호텔 부산" id="ht-name-3" class="flex-1 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="호텔명">
+                        <input type="text" value="부산진구 범천동 (범내골역)" id="ht-area-3" class="w-28 border rounded-lg px-2 py-1.5 bg-white" placeholder="위치">
+                        <input type="text" value="60,000원대" id="ht-price-3" class="w-24 border rounded-lg px-2 py-1.5 bg-white text-center font-bold" placeholder="가격대">
+                        <button onclick="removeHotel(3)" class="text-red-500 hover:text-red-700 p-1.5"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+                    </div>
+
+                    <!-- Bus & Transport Editor -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                        <h3 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center border-b pb-4">
+                            <i class="fa-solid fa-bus text-blue-600 mr-2"></i> 전세버스 및 복귀 노선 설정
+                        </h3>
+                        <div class="space-y-4 text-xs sm:text-sm">
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-600 mb-1">배차 차량 안내 문구</label>
+                                <input type="text" id="bus-type" value="45인승 대형버스 (1대)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-600 mb-1">2일차 복귀 버스 경유 노선</label>
+                                <input type="text" id="bus-route" value="F1963(16:30) → 부산역 → 부산종합버스터미널(노포역)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 font-bold">
+                            </div>
+                            <button onclick="saveAdminData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-extrabold shadow transition">
+                                <i class="fa-solid fa-check mr-1"></i> 전체 설정 저장 및 참여자 화면에 반영
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= 3. GITHUB PUBLISHING & SHARE TAB ================= -->
+        <div id="tab-github" class="tab-content space-y-6 active">
+            <!-- Top Banner -->
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="space-y-2 max-w-2xl">
+                    <span class="bg-emerald-500 text-slate-950 font-extrabold text-xs px-3 py-1 rounded-full uppercase">GitHub Pages 무료 웹 호스팅</span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold">GitHub 퍼블리싱 및 참여자 배포 센터</h2>
+                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                        현재 보고 계신 플랫폼(수정사항 포함)을 단일 <code class="bg-white/10 px-1.5 py-0.5 rounded text-yellow-300">index.html</code> 파일로 다운로드하여 <strong>GitHub Pages</strong>에 업로드하면 전 세계 어디서나 접속 가능한 공식 웹 링크가 생성됩니다.
+                    </p>
+                </div>
+                <button onclick="downloadCurrentHtml()" class="w-full md:w-auto bg-yellow-400 hover:bg-yellow-300 text-slate-950 px-6 py-4 rounded-2xl font-extrabold text-sm shadow-xl transition flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-file-arrow-down text-lg mr-2"></i> 배포용 index.html 다운로드
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Step-by-Step GitHub Pages Guide (7 cols) -->
+                <div class="lg:col-span-7 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+                    <h3 class="text-lg font-extrabold text-slate-900 flex items-center border-b pb-4">
+                        <i class="fa-brands fa-github text-2xl mr-2 text-slate-800"></i> 1분 만에 끝내는 GitHub Pages 퍼블리싱 가이드
+                    </h3>
+
+                    <div class="space-y-4 text-xs sm:text-sm">
+                        <div class="flex items-start space-x-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                            <span class="w-7 h-7 rounded-full bg-indigo-600 text-white font-extrabold flex items-center justify-center shrink-0">1</span>
+                            <div class="space-y-1">
+                                <h4 class="font-extrabold text-slate-900">배포용 <code class="text-indigo-600">index.html</code> 파일 다운로드</h4>
+                                <p class="text-slate-600">우측 상단의 <strong>[배포용 index.html 다운로드]</strong> 버튼을 눌러 현재 설정된 플랫폼 파일을 PC에 저장합니다.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                            <span class="w-7 h-7 rounded-full bg-indigo-600 text-white font-extrabold flex items-center justify-center shrink-0">2</span>
+                            <div class="space-y-1">
+                                <h4 class="font-extrabold text-slate-900">GitHub 신규 저장소(Repository) 생성 및 파일 업로드</h4>
+                                <p class="text-slate-600"><a href="https://github.com/new" target="_blank" class="text-indigo-600 font-bold underline">github.com/new</a>에 접속하여 저장소 이름(예: <code class="bg-slate-200 px-1 rounded">busan-edu-2026</code>)을 입력하고 <strong>Public</strong>으로 생성한 뒤, 다운로드한 <code class="bg-slate-200 px-1 rounded">index.html</code> 파일을 업로드(Commit)합니다.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3.5 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                            <span class="w-7 h-7 rounded-full bg-indigo-600 text-white font-extrabold flex items-center justify-center shrink-0">3</span>
+                            <div class="space-y-1">
+                                <h4 class="font-extrabold text-slate-900">Settings → Pages 활성화</h4>
+                                <p class="text-slate-600">저장소 상단 메뉴의 <strong>[Settings]</strong> → 좌측 메뉴 <strong>[Pages]</strong>로 이동한 후, <strong>Branch</strong>를 <code class="bg-slate-200 px-1 rounded">main</code> (또는 master)으로 선택하고 <strong>[Save]</strong>를 클릭하면 약 1분 뒤 공식 배포 URL이 발급됩니다!</p>
+                            </div>
+                        </div>
+
+                        <!-- CLI Snippet for Advanced Users -->
+                        <div class="bg-slate-900 text-slate-200 p-4 rounded-xl space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[11px] font-bold text-emerald-400 uppercase"><i class="fa-solid fa-terminal mr-1"></i> 터미널(Git CLI)로 바로 배포하기</span>
+                                <button onclick="copyGitCommands()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-2.5 py-1 rounded border border-slate-700 transition">명령어 복사</button>
+                            </div>
+                            <pre id="git-cli-code" class="text-xs font-mono text-slate-300 overflow-x-auto leading-relaxed">git init
+git add index.html
+git commit -m "Publish 2026 Busan Urban Regeneration Platform"
+git branch -M main
+git remote add origin https://github.com/[계정아이디]/busan-edu-2026.git
+git push -u origin main</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Share Link & KakaoTalk Template (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+                        <h3 class="text-lg font-extrabold text-slate-900 flex items-center border-b pb-4">
+                            <i class="fa-solid fa-share-nodes text-emerald-600 mr-2"></i> 교육생 공지 및 링크 공유 도구
+                        </h3>
+                        
+                        <div class="space-y-3 text-xs sm:text-sm">
+                            <div>
+                                <label class="block text-xs font-extrabold text-slate-600 mb-1">배포된 GitHub Pages 또는 플랫폼 URL</label>
+                                <div class="flex space-x-2">
+                                    <input type="text" id="share-link-input" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 font-mono" value="https://hug-edu.github.io/busan-2026/">
+                                    <button onclick="copyShareLink()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 text-xs rounded-xl font-extrabold transition shrink-0 shadow">
+                                        <i class="fa-solid fa-copy mr-1"></i> URL 복사
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-emerald-50/70 rounded-xl border border-emerald-100 space-y-2.5">
+                                <span class="text-xs font-extrabold text-emerald-900 flex items-center">
+                                    <i class="fa-solid fa-comment-dots text-emerald-600 mr-1.5"></i> 지자체 공무원 단체공지/알림톡 템플릿
+                                </span>
+                                <div class="bg-white p-3.5 rounded-xl border border-emerald-200 text-xs text-slate-700 leading-relaxed space-y-1" id="share-template">
+                                    <p class="font-bold text-slate-900">[2026년 도시재생 지자체 공무원 교육 안내]</p>
+                                    <p>• 일시: 2026. 10. 28.(수) ~ 10. 29.(목) / 13시간</p>
+                                    <p>• 집결: 10. 28.(수) 09:30까지 아바니 센트럴 부산 브릿지2홀</p>
+                                    <p>• 주요내용: 도시재생 계획·보조금·사후관리 이론 및 동래·수영구 현장답사</p>
+                                    <p class="text-indigo-700 font-semibold pt-1">아래 모바일 플랫폼에서 세부 시간표, 답사 동선 지도, 추천 숙박을 확인해 주시기 바랍니다.</p>
+                                </div>
+                                <button onclick="copyTemplate()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 rounded-xl font-extrabold text-xs transition shadow">
+                                    <i class="fa-solid fa-paper-plane mr-1"></i> 공지 문구 + 접속 링크 한번에 복사하기
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 mt-12 border-t border-slate-800 text-center text-xs">
+        <div class="max-w-7xl mx-auto px-4 space-y-1.5">
+            <p class="font-bold text-slate-300">2026년 도시재생 지자체 공무원 교육 운영과정 | 주관: 주택도시보증공사(HUG) · 국토연구원 · 이엔아이그룹</p>
+            <p class="text-slate-500">교육신청 및 문의: edu@khug.or.kr | 운영사무국: 02-998-2316 | 수료기준: 총 13시간 중 100% 출석</p>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+    <script>
+        // HWP 수정사항(261022 반영본) 데이터 구조
+        let appData = {
+            schedules: [
+                { day: 1, time: "09:00 ~ 09:30", title: "교육장 집결 및 등록 확인", speaker: "운영사무국", desc: "아바니 센트럴 부산 브릿지2홀 출석체크 및 교재 배포", badge: "등록" },
+                { day: 1, time: "09:30 ~ 12:00", title: "도시재생 정책 이해 및 활성화 계획 수립", speaker: "박정은 책임연구원 (국토연구원)", desc: "도시재생 전략계획 및 활성화계획 수립 가이드라인 (2.5h)", badge: "이론 1" },
+                { day: 1, time: "12:00 ~ 13:00", title: "중식 (구내 및 인근 식당)", speaker: "센트럴 세븐호텔 뷔페식", desc: "교육생 오찬 및 네트워킹", badge: "식사" },
+                { day: 1, time: "13:00 ~ 14:30", title: "보조금 정산 절차 및 주요 주의사항", speaker: "김진래 대리 (주택도시보증공사)", desc: "국고보조금 집행·관리 및 정산 실무 핵심 체크포인트 (1.5h)", badge: "이론 2" },
+                { day: 1, time: "14:30 ~ 16:00", title: "도시재생사업 평가 및 성과관리 방안", speaker: "이진희 연구위원 (국토연구원)", desc: "추진실적 평가 대응 및 도시재생 성과관리 체계 이해 (1.5h)", badge: "이론 3" },
+                { day: 1, time: "16:00 ~ 17:30", title: "도시재생 사후관리 사례 및 실무 교육", speaker: "박성은 차장 (주택도시보증공사)", desc: "마중물 사업 완료 후 거점시설 운영 및 사후관리 사례 (1.5h)", badge: "이론 4" },
+                { day: 2, time: "09:00 ~ 10:00", title: "집결 및 동래구 현장답사지 이동", speaker: "45인승 전용버스 탑승", desc: "아바니 센트럴 부산 출발 → 동래구 혁신어울림센터 이동", badge: "이동" },
+                { day: 2, time: "10:00 ~ 11:30", title: "동래구 도시재생 거점시설 현장 투어", speaker: "동래구 도시재생현장지원센터", desc: "혁신어울림센터, 청년어울림센터, 작은도서관, 미디어놀이터 답사", badge: "답사 1" },
+                { day: 2, time: "11:40 ~ 12:40", title: "중식 및 수영구 이동", speaker: "인근 식당 (쌈보보쌈 등)", desc: "중식 후 수영구 도시재생 현장으로 버스 이동", badge: "식사" },
+                { day: 2, time: "13:30 ~ 14:00", title: "수영구 도시재생 사업 Case-Study 특강", speaker: "이재민 사무국장 (수영구 센터)", desc: "역사문화자원 활용 및 주민참여 기반 수영구 도시재생 사례 소개", badge: "특강" },
+                { day: 2, time: "14:00 ~ 16:00", title: "수영구 주요 도시재생 현장 사례 투어", speaker: "현장 전문가 동행 해설", desc: "도도수영(수영사적공원) → B-CON그라운드 → 고려제강기념관 → F1963", badge: "답사 2" },
+                { day: 2, time: "16:00 ~ 16:30", title: "종합 강평 및 설문조사 · 기념촬영", speaker: "HUG · 국토연구원 · 교육생 전원", desc: "기념품(부기 굿즈 7종) 지급 및 복귀 교통편(부산역·노포역) 탑승", badge: "수료/복귀" }
+            ],
+            places: [
+                { type: "출발지", name: "아바니 센트럴 부산", address: "부산 남구 문현금융로 40", lat: 35.1485, lng: 129.0655, desc: "1일차 이론교육장(브릿지2홀) 및 2일차 집결 출발지", tag: "이론교육·집결" },
+                { type: "경유지", name: "동래구 혁신어울림센터", address: "부산 동래구 온천장로 119", lat: 35.2195, lng: 129.0825, desc: "쇠퇴한 온천장 지역 활성화 및 세대 간 소통을 이끄는 복합 거점 공간", tag: "동래구 거점" },
+                { type: "경유지", name: "도도수영 & 수영사적공원", address: "부산 수영구 수영성로 43", lat: 35.1708, lng: 129.1147, desc: "역사문화자원을 활용한 지역 활성화 및 공동체 회복 도시재생 거점", tag: "수영구 답사1" },
+                { type: "경유지", name: "B-CON 그라운드 (비콘)", address: "부산 수영구 망미번영로 55", lat: 35.1748, lng: 129.1112, desc: "수영고가도로 하부 유휴부지를 컨테이너로 재생한 복합생활문화공간", tag: "수영구 답사2" },
+                { type: "목적지", name: "F1963 (고려제강 기념관)", address: "부산 수영구 구락로123번길 20", lat: 35.1766, lng: 129.1149, desc: "민관 협업을 통해 폐와이어 공장을 리노베이션한 세계적 복합문화공간", tag: "최종목적지" }
+            ],
+            hotels: [
+                { name: "아바니 센트럴 부산 (교육장 당해 건물)", area: "남구 문현금융로 (문현역)", price: "공무원 협약가 문의", rating: "4.8", note: "1일차 교육장 내 위치" },
+                { name: "부산 비즈니스 호텔", area: "부산진구 부전동 (서면역)", price: "70,000원대", rating: "4.5", note: "여비 상한액 내 추천" },
+                { name: "호텔 토요코인 부산서면", area: "부산진구 서전로 (서면역)", price: "65,000원대", rating: "4.6", note: "조식 무료·문현역 2정거장" },
+                { name: "아너스 호텔 부산", area: "부산진구 범천동 (범내골역)", price: "60,000원대", rating: "4.3", note: "교육장 도보/지하철 인접" }
+            ]
+        };
+
+        let map = null;
+        let mapLayers = [];
+        let placeMarkers = [];
+
+        window.onload = function() {
+            if (window.location.href && !window.location.href.startsWith('blob:')) {
+                document.getElementById('share-link-input').value = window.location.href;
+            }
+            renderParticipantView();
+            renderAdminView();
+            initMap();
+        };
+
+        // 탭 전환 함수
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+
+            const tabs = ['participant', 'admin', 'github'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('btn-' + t);
+                if (t === tab) {
+                    btn.className = "flex-1 sm:flex-initial px-3.5 py-2 text-xs sm:text-sm font-bold rounded-xl bg-yellow-400 text-indigo-950 transition shadow";
+                } else {
+                    btn.className = "flex-1 sm:flex-initial px-3.5 py-2 text-xs sm:text-sm font-bold rounded-xl bg-indigo-900 text-indigo-200 hover:bg-indigo-800 transition";
+                }
+            });
+
+            if (tab === 'participant') {
+                setTimeout(() => { if(map) map.invalidateSize(); }, 200);
+            }
+        }
+
+        // 1일차 / 2일차 시간표 전환
+        function setDayTab(day) {
+            const btn1 = document.getElementById('day1-btn');
+            const btn2 = document.getElementById('day2-btn');
+            const content1 = document.getElementById('day1-content');
+            const content2 = document.getElementById('day2-content');
+
+            if (day === 1) {
+                btn1.className = "px-4 py-2 text-xs sm:text-sm font-extrabold rounded-lg bg-indigo-600 text-white shadow transition";
+                btn2.className = "px-4 py-2 text-xs sm:text-sm font-extrabold rounded-lg text-slate-600 hover:text-slate-900 transition";
+                content1.classList.remove('hidden');
+                content2.classList.add('hidden');
+            } else {
+                btn2.className = "px-4 py-2 text-xs sm:text-sm font-extrabold rounded-lg bg-emerald-600 text-white shadow transition";
+                btn1.className = "px-4 py-2 text-xs sm:text-sm font-extrabold rounded-lg text-slate-600 hover:text-slate-900 transition";
+                content2.classList.remove('hidden');
+                content1.classList.add('hidden');
+            }
+        }
+
+        // 참여자 뷰 동적 렌더링 (가독성 강화)
+        function renderParticipantView() {
+            let day1Html = '';
+            let day2Html = '';
+
+            appData.schedules.forEach((item) => {
+                const isMealOrMove = item.badge === '식사' || item.badge === '이동' || item.badge === '등록';
+                const borderCol = item.day === 1 ? (isMealOrMove ? 'border-slate-300 bg-slate-50/70' : 'border-indigo-500 bg-white') : (isMealOrMove ? 'border-slate-300 bg-slate-50/70' : 'border-emerald-500 bg-white');
+                const badgeCol = item.day === 1 ? (isMealOrMove ? 'bg-slate-200 text-slate-700' : 'bg-indigo-100 text-indigo-700') : (isMealOrMove ? 'bg-slate-200 text-slate-700' : 'bg-emerald-100 text-emerald-700');
+
+                const cardHtml = `
+                    <div class="border-l-4 ${borderCol} rounded-r-xl p-3.5 sm:p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:shadow-md transition">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[11px] font-extrabold px-2 py-0.5 rounded ${badgeCol}">${item.badge || '일정'}</span>
+                                <span class="text-xs sm:text-sm font-extrabold text-slate-500"><i class="fa-regular fa-clock mr-1"></i>${item.time}</span>
+                            </div>
+                            <h4 class="text-sm sm:text-base font-extrabold text-slate-900">${item.title}</h4>
+                            <p class="text-xs text-slate-500">${item.desc}</p>
+                        </div>
+                        <div class="sm:text-right shrink-0">
+                            <span class="inline-block bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                                <i class="fa-solid fa-user-tie mr-1 text-slate-400"></i> ${item.speaker}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                if (Number(item.day) === 1) day1Html += cardHtml;
+                else day2Html += cardHtml;
+            });
+
+            document.getElementById('participant-day1-list').innerHTML = day1Html;
+            document.getElementById('participant-day2-list').innerHTML = day2Html;
+
+            // 방문지 카드 및 상단 스텝 바 렌더링
+            let placesCardHtml = '';
+            let stepBarHtml = '';
+
+            appData.places.forEach((p, idx) => {
+                const seq = idx + 1;
+                const badgeClass = p.type === '출발지' ? 'bg-blue-600 text-white' : (p.type === '목적지' ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white');
+                
+                placesCardHtml += `
+                    <div onclick="focusPlaceOnMap(${idx})" class="cursor-pointer group p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/50 hover:border-indigo-300 transition flex items-start space-x-3.5">
+                        <div class="w-8 h-8 rounded-full ${badgeClass} font-extrabold text-sm flex items-center justify-center shrink-0 shadow mt-0.5">
+                            ${seq}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold text-slate-400 uppercase">${p.type} · ${p.tag || '주요거점'}</span>
+                                <span class="text-xs text-indigo-600 font-bold group-hover:translate-x-0.5 transition"><i class="fa-solid fa-location-crosshairs mr-1"></i>지도 위치</span>
+                            </div>
+                            <h4 class="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5 truncate">${p.name}</h4>
+                            <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-location-dot mr-1 text-slate-400"></i>${p.address}</p>
+                            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed bg-white p-2.5 rounded-lg border border-slate-100">${p.desc}</p>
+                        </div>
+                    </div>
+                `;
+
+                stepBarHtml += `
+                    <button onclick="focusPlaceOnMap(${idx})" class="flex items-center space-x-1.5 bg-white hover:bg-indigo-50 px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm transition">
+                        <span class="w-5 h-5 rounded-full ${badgeClass} text-[11px] font-extrabold flex items-center justify-center">${seq}</span>
+                        <span class="font-bold text-slate-800">${p.name}</span>
+                    </button>
+                    ${idx < appData.places.length - 1 ? '<i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>' : ''}
+                `;
+            });
+
+            document.getElementById('participant-places-cards').innerHTML = placesCardHtml;
+            document.getElementById('route-step-bar').innerHTML = stepBarHtml;
+
+            // 숙박 리스트 렌더링
+            let hotelHtml = '';
+            appData.hotels.forEach(h => {
+                hotelHtml += `
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between space-y-2 hover:border-amber-300 transition">
+                        <div>
+                            <div class="flex justify-between items-start gap-2">
+                                <h4 class="font-extrabold text-slate-900 text-sm">${h.name}</h4>
+                                <span class="bg-amber-100 text-amber-800 text-[11px] font-extrabold px-2 py-0.5 rounded shrink-0">★ ${h.rating || '4.5'}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1"><i class="fa-solid fa-train-subway mr-1 text-slate-400"></i>${h.area}</p>
+                        </div>
+                        <div class="pt-2 border-t border-slate-200/60 flex justify-between items-center text-xs">
+                            <span class="text-slate-500">${h.note || '숙박비 상한 내'}</span>
+                            <strong class="text-indigo-700 font-extrabold">${h.price}</strong>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('participant-hotel-list').innerHTML = hotelHtml;
+
+            // 버스 요약 동기화
+            const busTypeVal = document.getElementById('bus-type') ? document.getElementById('bus-type').value : "45인승 대형버스 (1대)";
+            const busRouteVal = document.getElementById('bus-route') ? document.getElementById('bus-route').value : "F1963(16:30) → 부산역 → 노포역";
+            document.getElementById('part-bus-type').innerText = busTypeVal;
+            document.getElementById('part-bus-route').innerText = busRouteVal;
+            document.getElementById('summary-bus-route').innerText = busRouteVal;
+        }
+
+        // 지도 초기화 및 경로 폴리라인 렌더링
+        function initMap() {
+            if (map) map.remove();
+            map = L.map('map').setView([35.180, 129.090], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            updateMapRouting();
+        }
+
+        function updateMapRouting() {
+            if (!map) return;
+            mapLayers.forEach(l => map.removeLayer(l));
+            mapLayers = [];
+            placeMarkers = [];
+
+            if (appData.places.length === 0) return;
+
+            let latlngs = [];
+
+            appData.places.forEach((place, index) => {
+                let seqNo = index + 1;
+                let bgCol = place.type === '출발지' ? '#2563eb' : (place.type === '목적지' ? '#dc2626' : '#059669');
+                
+                let markerHtml = `<div style="background-color: ${bgCol}; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.35); border: 3px solid white;">${seqNo}</div>`;
+                
+                let customIcon = L.divIcon({
+                    className: 'custom-routing-icon',
+                    html: markerHtml,
+                    iconSize: [34, 34],
+                    iconAnchor: [17, 17]
+                });
+
+                let marker = L.marker([place.lat, place.lng], { icon: customIcon }).addTo(map)
+                    .bindPopup(`
+                        <div style="font-family:'Pretendard',sans-serif; min-width:210px; padding:2px;">
+                            <span style="background:${bgCol}; color:white; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px;">${seqNo}번째 · ${place.type}</span>
+                            <h4 style="font-size:14px; font-weight:800; margin:6px 0 2px; color:#0f172a;">${place.name}</h4>
+                            <p style="font-size:11px; color:#64748b; margin:0 0 6px;">${place.address}</p>
+                            <p style="font-size:12px; color:#334155; margin:0; line-height:1.4;">${place.desc}</p>
+                        </div>
+                    `);
+                
+                mapLayers.push(marker);
+                placeMarkers.push(marker);
+                latlngs.push([place.lat, place.lng]);
+            });
+
+            if (latlngs.length > 1) {
+                let polyline = L.polyline(latlngs, {
+                    color: '#4f46e5',
+                    weight: 4,
+                    opacity: 0.85,
+                    dashArray: '8, 8'
+                }).addTo(map);
+                mapLayers.push(polyline);
+                map.fitBounds(polyline.getBounds(), { padding: [45, 45] });
+            }
+        }
+
+        // 특정 방문지 클릭 시 지도로 스크롤 및 팝업 오픈
+        function focusPlaceOnMap(idx) {
+            const place = appData.places[idx];
+            if (!place || !map) return;
+            document.getElementById('section-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                map.setView([place.lat, place.lng], 15, { animate: true });
+                if (placeMarkers[idx]) placeMarkers[idx].openPopup();
+            }, 300);
+        }
+
+        function fitAllMarkers() {
+            if (!map || appData.places.length === 0) return;
+            let latlngs = appData.places.map(p => [p.lat, p.lng]);
+            map.fitBounds(L.latLngBounds(latlngs), { padding: [45, 45] });
+        }
+
+        // 관리자 뷰 렌더링
+        function renderAdminView() {
+            // 1. 일정 편집기
+            let schedHtml = '';
+            appData.schedules.forEach((s, idx) => {
+                schedHtml += `
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <select id="sch-day-${idx}" class="font-extrabold border rounded-lg px-2 py-1.5 bg-white text-indigo-700">
+                            <option value="1" ${Number(s.day)===1?'selected':''}>1일차</option>
+                            <option value="2" ${Number(s.day)===2?'selected':''}>2일차</option>
+                        </select>
+                        <input type="text" value="${s.time}" id="sch-time-${idx}" class="w-28 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="시간">
+                        <input type="text" value="${s.title}" id="sch-title-${idx}" class="flex-1 min-w-[160px] font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강의/일정명">
+                        <input type="text" value="${s.speaker}" id="sch-speaker-${idx}" class="w-36 border rounded-lg px-2.5 py-1.5 bg-white" placeholder="강사/장소">
+                        <button onclick="removeSchedule(${idx})" class="text-red-500 hover:bg-red-50 p-2 rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            });
+            document.getElementById('admin-schedule-list').innerHTML = schedHtml;
+
+            // 2. 코스 편집기
+            let placeHtml = '';
+            appData.places.forEach((p, idx) => {
+                let typeColor = p.type === '출발지' ? 'bg-blue-50 text-blue-700 border-blue-200' : (p.type === '목적지' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200');
+                placeHtml += `
+                    <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5 text-xs">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center space-x-2 flex-1">
+                                <span class="w-6 h-6 rounded-full bg-slate-800 text-white flex items-center justify-center font-extrabold shrink-0">${idx + 1}</span>
+                                <select id="pl-type-${idx}" class="font-extrabold border rounded-lg px-2 py-1.5 ${typeColor}">
+                                    <option value="출발지" ${p.type==='출발지'?'selected':''}>출발지</option>
+                                    <option value="경유지" ${p.type==='경유지'?'selected':''}>경유지</option>
+                                    <option value="목적지" ${p.type==='목적지'?'selected':''}>목적지</option>
+                                </select>
+                                <input type="text" value="${p.name}" id="pl-name-${idx}" placeholder="방문지명" class="font-extrabold border rounded-lg px-2.5 py-1.5 bg-white flex-1">
+                            </div>
+                            <div class="flex items-center space-x-1 shrink-0">
+                                <button onclick="movePlace(${idx}, -1)" ${idx===0?'disabled':''} class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-up"></i></button>
+                                <button onclick="movePlace(${idx}, 1)" ${idx===appData.places.length-1?'disabled':''} class="p-1.5 bg-white border rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-30"><i class="fa-solid fa-arrow-down"></i></button>
+                                <button onclick="removePlace(${idx})" class="p-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 ml-1"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input type="text" value="${p.address}" id="pl-addr-${idx}" placeholder="상세 주소" class="border rounded-lg px-2.5 py-1.5 bg-white sm:col-span-2">
+                            <div class="flex space-x-1">
+                                <input type="text" value="${p.lat}" id="pl-lat-${idx}" placeholder="위도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                                <input type="text" value="${p.lng}" id="pl-lng-${idx}" placeholder="경도" class="w-1/2 border rounded-lg px-2 py-1.5 bg-white text-center font-mono">
+                            </div>
+                        </div>
+                        <input type="text" value="${p.desc}" id="pl-desc-${idx}" placeholder="답사 포인트 설명" class="w-full border rounded-lg px-2.5 py-1.5 bg-white text-slate-600">
+                    </div>
+                `;
+            });
+            document.getElementById('admin-course-list').innerHTML = placeHtml;
+
+            // 3. 호텔 편집기
+            let hotelHtml = '';
+            appData.hotels.forEach((h, idx) => {
+                hotelHtml += `
+                    <div class="flex items-center space-x-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs">
+                        <input type="text" value="${h.name}" id="ht-name-${idx}" class="flex-1 font-bold border rounded-lg px-2.5 py-1.5 bg-white" placeholder="호텔명">
+                        <input type="text" value="${h.area}" id="ht-area-${idx}" class="w-28 border rounded-lg px-2 py-1.5 bg-white" placeholder="위치">
+                        <input type="text" value="${h.price}" id="ht-price-${idx}" class="w-24 border rounded-lg px-2 py-1.5 bg-white text-center font-bold" placeholder="가격대">
+                        <button onclick="removeHotel(${idx})" class="text-red-500 hover:text-red-700 p-1.5"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            });
+            document.getElementById('admin-hotel-list').innerHTML = hotelHtml;
+        }
+
+        function syncInputsToAppData() {
+            appData.schedules.forEach((s, idx) => {
+                let dElem = document.getElementById(`sch-day-${idx}`);
+                let tElem = document.getElementById(`sch-time-${idx}`);
+                let tiElem = document.getElementById(`sch-title-${idx}`);
+                let spElem = document.getElementById(`sch-speaker-${idx}`);
+                if (dElem) s.day = parseInt(dElem.value);
+                if (tElem) s.time = tElem.value;
+                if (tiElem) s.title = tiElem.value;
+                if (spElem) s.speaker = spElem.value;
+            });
+
+            appData.places.forEach((p, idx) => {
+                let typeElem = document.getElementById(`pl-type-${idx}`);
+                let nElem = document.getElementById(`pl-name-${idx}`);
+                let addrElem = document.getElementById(`pl-addr-${idx}`);
+                let latElem = document.getElementById(`pl-lat-${idx}`);
+                let lngElem = document.getElementById(`pl-lng-${idx}`);
+                let descElem = document.getElementById(`pl-desc-${idx}`);
+                
+                if (typeElem) p.type = typeElem.value;
+                if (nElem) p.name = nElem.value;
+                if (addrElem) p.address = addrElem.value;
+                if (latElem) p.lat = parseFloat(latElem.value) || p.lat;
+                if (lngElem) p.lng = parseFloat(lngElem.value) || p.lng;
+                if (descElem) p.desc = descElem.value;
+            });
+
+            appData.hotels.forEach((h, idx) => {
+                let nElem = document.getElementById(`ht-name-${idx}`);
+                let aElem = document.getElementById(`ht-area-${idx}`);
+                let prElem = document.getElementById(`ht-price-${idx}`);
+                if (nElem) h.name = nElem.value;
+                if (aElem) h.area = aElem.value;
+                if (prElem) h.price = prElem.value;
+            });
+        }
+
+        function addScheduleItem() {
+            syncInputsToAppData();
+            appData.schedules.push({ day: 2, time: "15:00 ~ 16:00", title: "신규 추가 일정", speaker: "담당 강사", desc: "세부 교육 내용", badge: "추가" });
+            renderAdminView();
+            renderParticipantView();
+        }
+
+        function removeSchedule(idx) {
+            syncInputsToAppData();
+            appData.schedules.splice(idx, 1);
+            renderAdminView();
+            renderParticipantView();
+        }
+
+        function addCoursePlace() {
+            syncInputsToAppData();
+            appData.places.push({ type: "경유지", name: "신규 답사 장소", address: "부산광역시 수영구", lat: 35.1730, lng: 129.1130, desc: "신규 추가된 도시재생 거점 설명", tag: "추가거점" });
+            renderAdminView();
+            renderParticipantView();
+            updateMapRouting();
+        }
+
+        function movePlace(idx, direction) {
+            let targetIdx = idx + direction;
+            if (targetIdx < 0 || targetIdx >= appData.places.length) return;
+            syncInputsToAppData();
+            let temp = appData.places[idx];
+            appData.places[idx] = appData.places[targetIdx];
+            appData.places[targetIdx] = temp;
+            renderAdminView();
+            renderParticipantView();
+            updateMapRouting();
+        }
+
+        function removePlace(idx) {
+            syncInputsToAppData();
+            appData.places.splice(idx, 1);
+            renderAdminView();
+            renderParticipantView();
+            updateMapRouting();
+        }
+
+        function addHotel() {
+            syncInputsToAppData();
+            appData.hotels.push({ name: "신규 추천 호텔", area: "서면·문현역 인근", price: "70,000원대", rating: "4.5", note: "여비 상한액 내" });
+            renderAdminView();
+            renderParticipantView();
+        }
+
+        function removeHotel(idx) {
+            syncInputsToAppData();
+            appData.hotels.splice(idx, 1);
+            renderAdminView();
+            renderParticipantView();
+        }
+
+        function saveAdminData() {
+            syncInputsToAppData();
+            renderAdminView();
+            renderParticipantView();
+            updateMapRouting();
+            showToast("수정사항이 참여자 가이드 및 지도에 즉시 반영되었습니다!");
+        }
+
+        function resetAdminData() {
+            location.reload();
+        }
+
+        // GitHub Pages 배포용 단일 HTML 다운로드
+        function downloadCurrentHtml() {
+            syncInputsToAppData();
+            renderParticipantView();
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "index.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("GitHub Pages 배포용 index.html 파일이 다운로드되었습니다!");
+        }
+
+        function copyGitCommands() {
+            const text = document.getElementById('git-cli-code').innerText;
+            copyTextToClipboard(text);
+            showToast("Git 배포 명령어가 복사되었습니다!");
+        }
+
+        function copyShareLink() {
+            const linkInput = document.getElementById('share-link-input');
+            copyTextToClipboard(linkInput.value);
+            showToast("참여자 접속 URL이 클립보드에 복사되었습니다!");
+        }
+
+        function copyTemplate() {
+            const templateText = document.getElementById('share-template').innerText + "\n\n🔗 플랫폼 바로가기: " + document.getElementById('share-link-input').value;
+            copyTextToClipboard(templateText);
+            showToast("공지 문구와 접속 링크가 복사되었습니다. 단체방에 붙여넣기 하세요!");
+        }
+
+        function copyTextToClipboard(text) {
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = text;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            tempTextArea.remove();
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-6 right-6 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl z-50 flex items-center space-x-3 text-xs sm:text-sm font-bold border border-slate-700 animate-bounce";
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-yellow-400 text-lg"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3500);
+        }
+    </script>
+
+</body></html>
