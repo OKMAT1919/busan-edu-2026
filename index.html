@@ -6,8 +6,13 @@
 <meta name="theme-color" content="#0B2F5E">
 <title>도시재생 공무원 교육</title>
 <meta name="description" content="2026년 도시재생 지자체 공무원 교육(10.28~10.29, 부산) 참가자 안내 플랫폼">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preload" href="fonts/HanUllim-R.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/HanDotum-B.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+/* 한수원 서체: 본문 400 = 한울림 / 500~700 = 한돋움 R / 800~900 = 한돋움 B */
+@font-face{font-family:'KHNP';src:url('fonts/HanUllim-R.woff2') format('woff2');font-weight:100 500;font-display:swap}
+@font-face{font-family:'KHNP';src:url('fonts/HanDotum-R.woff2') format('woff2');font-weight:501 700;font-display:swap}
+@font-face{font-family:'KHNP';src:url('fonts/HanDotum-B.woff2') format('woff2');font-weight:701 900;font-display:swap}
 :root{
   --navy:#0B2F5E; --navy-2:#003E7E; --blue:#0054A6; --sky:#0072BC; --tint:#EEF5FC;
   --orange:#F37321; --orange-d:#D95B08; --green:#009B77; --gold:#C59B27;
@@ -27,7 +32,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
-body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
+body{font-synthesis:none;word-break:keep-all;overflow-wrap:break-word;font-family:'KHNP',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif;
   letter-spacing:-.02em;background:var(--bg);color:var(--ink);line-height:1.55;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
