@@ -298,6 +298,9 @@ td.empty{background:repeating-linear-gradient(135deg,transparent 0 8px,var(--lin
 .menu-box{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--tint)}
 .menu-k{font-size:12px;font-weight:800;color:#fff;background:var(--navy-2);padding:3px 8px;border-radius:6px}
 .menu-box b{font-size:15px;font-weight:800;flex:1 0 auto;white-space:nowrap}
+.menu-items{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px}
+.menu-items span{font-size:13.5px;font-weight:700;background:var(--card);border:1px solid var(--line);padding:6px 11px;border-radius:999px}
+.menu-hint{flex-basis:100%;font-size:12.5px;color:var(--ink-3)}
 .menu-link{margin-top:0;background:var(--card);padding:6px 10px;font-size:12.5px}
 .meal-act{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:10px}
 .meal-act .call{padding:8px 12px;font-size:13px}
@@ -668,7 +671,7 @@ const DATA = {
   meals: [
     { tag: '1일차 중식', color: 'p-blue', when: '10.28(수) 12:00', place: '아바니 센트럴 호텔 4층 더 큐브', note: '뷔페식', menu: '중식(Lunch)', menuUrl: 'https://avanicentralbusan.notion.site/4F-THE-CUBE-BUFFET-200828360d7f80c9b5d5ff035b3d122f', addr: '부산광역시 남구 전포대로 133, 아바니센트럴부산 4F', phone: '051-791-5840', q: '아바니 센트럴 부산' },
     { tag: '2일차 중식', color: 'p-green', when: '10.29(목) 11:40', place: '쌈보보쌈 온천장점', note: '한식', menu: '쌈보한상', menuUrl: 'https://app.catchtable.co.kr/ct/shop/ssambo_bossam/menu/menuInfo?foodMenuSeq=2620379', addr: '부산 동래구 금강로 118 1층', phone: '051-557-5353', q: '쌈보보쌈 온천장점' },
-    { tag: '2일차 음료', color: 'p-orange', when: '수영구 도시재생 사업 Case-Study', place: '도도수영 8A', note: '커피 및 음료 1인 1잔', menu: '수영성카페', menuUrl: 'https://naver.me/GpCTTRCf', addr: '수영구 도도수영 8A', q: '도도수영' },
+    { tag: '2일차 음료', color: 'p-orange', when: '수영구 도시재생 사업 Case-Study', place: '도도수영 8A', note: '커피 및 음료 1인 1잔', menu: '수영성카페', menuItems: ['아메리카노', '아이슈페너', '에이드', '아이스티', '스무디'], addr: '수영구 도도수영 8A', q: '도도수영' },
   ],
 };
 /* ========================================================= */
@@ -766,7 +769,7 @@ $('#hotels').innerHTML = DATA.hotels.map(h => `<div class="hotel"><div><h4>${h.n
 const callBtn = ph => `<a class="call" href="tel:${ph.replace(/-/g, '')}">${ICON.phone}전화</a>`;
 $('#contacts').innerHTML = DATA.contacts.map(c => `<div class="contact"><span class="avatar" style="background:${c.color}">${ICON[c.icon]}</span><div class="c-b"><small>${c.role}</small><h4>${c.name}</h4><p>${c.phone}</p></div>${callBtn(c.phone)}</div>`).join('');
 $('#emergency').innerHTML = DATA.emergency.map(e => `<div class="contact"><span class="avatar" style="background:${e.kind === '병원' ? '#DC2626' : '#EA580C'}">${ICON[e.kind === '병원' ? 'hospital' : 'fire']}</span><div class="c-b"><small>${e.kind === '병원' ? '응급의료' : '소방기관'}</small><h4>${e.name}</h4><p>${e.phone}</p></div>${callBtn(e.phone)}</div>`).join('');
-$('#meals').innerHTML = DATA.meals.map(m => `<div class="meal-card"><div class="meal-top"><span class="pill ${m.color}">${m.tag}</span><span class="muted">${m.when}</span></div><h4>${m.place}</h4><p class="meal-note">${m.note}</p>${m.menu ? `<div class="menu-box"><span class="menu-k">메뉴</span><b>${m.menu}</b>${m.menuUrl ? `<a class="sitelink menu-link" href="${m.menuUrl}" target="_blank" rel="noopener">메뉴 정보 보기<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>` : ''}</div>` : ''}<div class="tl-where">${ICON.pin}${m.addr}</div><div class="meal-act">${m.phone ? `<a class="call" href="tel:${m.phone.replace(/-/g, '')}">${ICON.phone}${m.phone}</a>` : ''}<div class="maplinks" style="margin-top:0">${mapLinks(m.q)}</div></div></div>`).join('');
+$('#meals').innerHTML = DATA.meals.map(m => `<div class="meal-card"><div class="meal-top"><span class="pill ${m.color}">${m.tag}</span><span class="muted">${m.when}</span></div><h4>${m.place}</h4><p class="meal-note">${m.note}</p>${m.menu ? `<div class="menu-box"><span class="menu-k">메뉴</span><b>${m.menu}</b>${m.menuUrl ? `<a class="sitelink menu-link" href="${m.menuUrl}" target="_blank" rel="noopener">메뉴 정보 보기<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>` : ''}${m.menuItems ? `<div class="menu-items">${m.menuItems.map(x => `<span>${x}</span>`).join('')}</div><p class="menu-hint">위 메뉴 중 1인 1잔을 선택하실 수 있습니다.</p>` : ''}</div>` : ''}<div class="tl-where">${ICON.pin}${m.addr}</div><div class="meal-act">${m.phone ? `<a class="call" href="tel:${m.phone.replace(/-/g, '')}">${ICON.phone}${m.phone}</a>` : ''}<div class="maplinks" style="margin-top:0">${mapLinks(m.q)}</div></div></div>`).join('');
 document.querySelector('.sos-call').innerHTML = ICON.phone + '전화';
 $$('.maplinks[data-q]').forEach(el => el.insertAdjacentHTML('afterbegin', mapLinks(el.dataset.q)));
 
