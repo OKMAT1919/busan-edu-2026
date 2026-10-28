@@ -262,7 +262,7 @@ function renderNow(){
   } else if (next) {
     html = `<div class="lbl">다음 일정 · DAY ${next.day} ${next.s}</div>
       <div class="big">${next.title}</div>
-      <div class="meta">${[next.who, next.where].filter(Boolean).join(' · ')}${next.day === 2 && next.s === '09:00' ? '<br>BIFC 자갈마당 · 전세버스 경남 72바 6112' : ''}</div>
+      <div class="meta">${[next.who, next.where].filter(Boolean).join(' · ')}${next.day === 2 && next.s === '09:00' ? '<br>BIFC 자갈마당 · 전세버스 경남 72바 6325 (오색투어)' : ''}</div>
       <button class="go" data-goto="${next.day === 2 && next.s === '09:00' ? 'route' : 'schedule'}">자세히 보기 →</button>`;
   } else {
     html = `<div class="lbl">교육 종료</div><div class="big">이틀간 함께해 주셔서 감사합니다 🙏</div>
